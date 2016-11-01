@@ -5,9 +5,8 @@
         <component-scan>${code4j.component-scan:com.tg}</component-scan>
     </configs>
 
-    <!--<bean class="com.tg.tiny4j.core.ioc.beans.reader.LogBeanPostProcessor"></bean>-->
-
-
+    <bean class="com.tg.tiny4j.core.ioc.beans.reader.LogBeanPostProcessor"></bean>
+    
     <bean id="testDao" class="com.tg.tiny4j.core.ioc.beans.reader.DaoBean"></bean>
 
     <bean id="testService" class="com.tg.tiny4j.core.ioc.beans.reader.ServiceBean">
