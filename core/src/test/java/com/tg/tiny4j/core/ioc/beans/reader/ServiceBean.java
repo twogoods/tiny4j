@@ -17,6 +17,13 @@ public class ServiceBean {
     @Inject
     private DaoBean daoBean;
 
+    public ServiceBean() {
+    }
+
+    public ServiceBean(DaoBean daoBean) {
+        this.daoBean = daoBean;
+    }
+
     public void service(){
         daoBean.execute();
     }
@@ -43,5 +50,13 @@ public class ServiceBean {
 
     public void setS2(String s2) {
         this.s2 = s2;
+    }
+
+    public void setDaoBean(DaoBean daoBean) {
+        this.daoBean = daoBean;
+    }
+
+    public DaoBean getDaoBean() {
+        return daoBean;
     }
 }

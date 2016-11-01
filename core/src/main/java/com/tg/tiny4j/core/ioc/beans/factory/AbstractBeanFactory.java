@@ -1,9 +1,12 @@
 package com.tg.tiny4j.core.ioc.beans.factory;
 
-import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
-import com.tg.tiny4j.core.ioc.beans.BeanPostProcessor;
-import com.tg.tiny4j.core.ioc.beans.BeanPropertyValue;
-import com.tg.tiny4j.core.ioc.beans.BeanReference;
+import com.tg.tiny4j.core.aop.AopProxy;
+import com.tg.tiny4j.core.aop.AutoSetterCglibAopProxy;
+import com.tg.tiny4j.core.aop.CglibAopProxy;
+import com.tg.tiny4j.core.aop.advice.AopAdvice;
+import com.tg.tiny4j.core.aop.advice.BeanAnnotatedAopInterceptor;
+import com.tg.tiny4j.core.aop.advice.Target;
+import com.tg.tiny4j.core.ioc.beans.*;
 import com.tg.tiny4j.core.ioc.exception.BeanException;
 import com.tg.tiny4j.core.ioc.utils.StringUtils;
 import com.tg.tiny4j.core.ioc.utils.Validate;
@@ -30,7 +33,6 @@ public abstract class AbstractBeanFactory implements BeanFactory {
 
     private void selectBeanPostProcessor() throws Exception {
         if (postProcessorList.size() == 0) {
-            log.debug("selectBeanPostProcessor...");
             log.debug("beans :{}", beans);
             for (String beanName : beans.keySet()) {
                 String classname = beans.get(beanName).getClassname();
@@ -38,7 +40,6 @@ public abstract class AbstractBeanFactory implements BeanFactory {
                     postProcessorList.add((BeanPostProcessor) getBean(beanName));
                 }
             }
-            log.debug("count:{}", postProcessorList.size());
         }
     }
 
@@ -50,6 +51,48 @@ public abstract class AbstractBeanFactory implements BeanFactory {
         }
     }
 
+    private Object createBeanAnnotatedBean(BeanAnnotatedDefinition beanAnnotatedDefinition) throws Exception {
+        /**
+         * 1.创建一个普通对象,把属性都付好值
+         * 2.设置aopadvice
+         * 3.创建cglib代理对象
+         * 4.为这个代理对象附上1中得到对象的属性值
+         * 5.调用这个代理对象的方法,aop的拦截器里会调真正的那个方法,创建第一个对象出来,这个时候把这个对象放到容器里
+         */
+        Object obj = createBean(beanAnnotatedDefinition);
+
+        AopAdvice beanAnnotatedAopAdvice = new AopAdvice();
+        beanAnnotatedAopAdvice.setTarget(new Target(beanAnnotatedDefinition.getClazz()));
+        beanAnnotatedAopAdvice.setInterceptor(new BeanAnnotatedAopInterceptor(beanAnnotatedDefinition.getMethodInfos(),beans, this));
+
+        AopProxy aopProxy = new AutoSetterCglibAopProxy(beanAnnotatedAopAdvice);
+        Object proxyObj = aopProxy.getProxy();
+
+        Class proxyClass = proxyObj.getClass();
+        Field[] fields = obj.getClass().getDeclaredFields();
+        for (Field f : fields) {
+            try {
+                f.setAccessible(true);
+                Method setter = proxyClass.getDeclaredMethod(getSetterName(f.getName()), f.getType());
+                setter.invoke(proxyObj, f.get(obj));
+            } catch (NoSuchMethodException e) {
+                log.warn(e.getMessage());
+            }
+        }
+
+
+        Map<String, String> annotatedMethods = beanAnnotatedDefinition.getMethodInfos();
+        log.debug("bean have @Bean method:{}",annotatedMethods);
+        for (String methodName : annotatedMethods.keySet()) {
+            Object bean = proxyClass.getDeclaredMethod(methodName).invoke(proxyObj);
+        }
+        return proxyObj;
+    }
+
+    private String getSetterName(String fieldName) {
+        return "set" + StringUtils.firstCharUpperCase(fieldName);
+    }
+
     @Override
     public Object getBean(String name) throws Exception {
         BeanDefinition beanDefinition = beans.get(name);
@@ -58,9 +101,15 @@ public abstract class AbstractBeanFactory implements BeanFactory {
         }
         Object bean = beanDefinition.getBean();
         if (Validate.isEmpty(bean)) {
-            bean = createBean(beans.get(name));
-            bean = postProcess(bean, name);
-            beanDefinition.setBean(bean);
+            if (beanDefinition instanceof BeanAnnotatedDefinition) {
+                bean=  createBeanAnnotatedBean((BeanAnnotatedDefinition) beanDefinition);
+                bean = postProcess(bean, name);
+                beanDefinition.setBean(bean);
+            } else {
+                bean = createBean(beans.get(name));
+                bean = postProcess(bean, name);
+                beanDefinition.setBean(bean);
+            }
         }
         return bean;
     }
@@ -78,6 +127,7 @@ public abstract class AbstractBeanFactory implements BeanFactory {
     }
 
     private Object createBean(BeanDefinition beanDefinition) throws Exception {
+        //TODO 不支持构造函数设置属性值
         Object o = beanDefinition.getClazz().newInstance();
         applyValue(o, beanDefinition);
         return o;

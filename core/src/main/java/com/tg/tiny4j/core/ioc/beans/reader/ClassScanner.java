@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,8 +46,11 @@ public class ClassScanner {
 
     }
 
-    public static Set<Class> getClasses(String filePath, Set<Class> classSet) throws ClassNotFoundException {
+    public static Set<Class> getClasses(String filePath, Set<Class> classSet) throws Exception {
         File file = new File(filePath);
+        if(!file.exists()){
+            throw new FileNotFoundException("check component-scan config, file or directory not found, path is "+filePath);
+        }
         for (String fileName : file.list()) {
             String childFilePath = filePath + File.separator + fileName;
             if (new File(childFilePath).isDirectory()) {
@@ -60,10 +64,5 @@ public class ClassScanner {
 
         }
         return classSet;
-    }
-
-    public static void main(String[] args) throws ClassNotFoundException {
-        Set<Class> set = new HashSet<>();
-        System.out.println(getClasses(getPathByPackage("com.tg"), set));
     }
 }

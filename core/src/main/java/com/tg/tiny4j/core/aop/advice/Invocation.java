@@ -15,5 +15,7 @@ interface Invocation {
 
     Method getMethod();
 
+    Class getObjClass();
+
 }
 

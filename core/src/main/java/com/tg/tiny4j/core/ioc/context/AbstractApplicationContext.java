@@ -13,6 +13,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext{
         registerBeans();
         //初始化容器上下文类
         instanceContextHolder();
+        //初始化所有的bean
         instanceBeanFactory();
     }
 

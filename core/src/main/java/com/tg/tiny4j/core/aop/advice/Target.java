@@ -14,6 +14,10 @@ public class Target {
         this.interfaceClazz = interfaceClazz;
     }
 
+    public Target(Class<?> clazz) {
+        this.clazz = clazz;
+    }
+
     public Object getTargetObj() {
         return targetObj;
     }

@@ -1,10 +1,12 @@
 package com.tg.tiny4j.core.ioc.beans.reader;
 
+import com.tg.tiny4j.core.ioc.beans.BeanAnnotatedDefinition;
 import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.beans.BeanPropertyValue;
 import com.tg.tiny4j.core.ioc.beans.BeanReference;
 import com.tg.tiny4j.core.ioc.exception.BeanDefinitionException;
 import com.tg.tiny4j.core.ioc.annotation.*;
+import com.tg.tiny4j.core.ioc.utils.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +21,7 @@ import java.util.*;
 public class AnnotationBeanDefinitionReader extends AbstractBeanDefinitionReader {
     private static Logger log = LogManager.getLogger(AnnotationBeanDefinitionReader.class);
 
-    private List<String> scanPackages=new ArrayList<>();
+    private List<String> scanPackages = new ArrayList<>();
 
     private Set<Class> classSet = new HashSet<>();
 
@@ -35,40 +37,79 @@ public class AnnotationBeanDefinitionReader extends AbstractBeanDefinitionReader
         for (String p : scanPackages) {
             ClassScanner.getClasses(ClassScanner.getPathByPackage(p), classSet);
         }
-        log.debug("AnnotationBeanDefinitionReader load class...");
         praseAutoConfigurationClass();
     }
 
     private void praseAutoConfigurationClass() throws Exception {
         for (Class clazz : classSet) {
-            handleTypeAnnot(clazz);
-        }
-    }
-
-    private void handleTypeAnnot(Class clazz) throws Exception {
-        Annotation[] annotations = clazz.getAnnotations();
-        if (annotations.length < 1) {
-            return;
-        }
-        for (Annotation annotation : annotations) {
-            //这两个注解功能基本一样
-            if (annotation instanceof Configuration) {
-                Configuration configAnnot = (Configuration) annotation;
-                registerBean(getBeanName(configAnnot.name(), clazz), clazz);
-            } else if (annotation.annotationType() == Component.class) {
-                Component configAnnot = (Component) annotation;
-                registerBean(getBeanName(configAnnot.name(), clazz), clazz);
-            } else {
-                //ignore
+            Pair<Boolean, Boolean> result = checkBeanAnnotated(clazz);
+            if (result.getL() && result.getR()) {
+                praseBeanAnnotatedClass(clazz);
+            } else if (result.getL()) {
+                praseClass(clazz);
             }
         }
     }
 
-    private void registerBean(String beanName, Class clazz) throws Exception {
-        BeanDefinition beanDefinition = new BeanDefinition(beanName, clazz);
-        handleFieldAnnot(clazz, beanDefinition);
 
-        log.debug("bean: {}",beanDefinition);
+    /**
+     * pair的left指明是否是配置的bean,right指是否有@Bean注解
+     */
+    private Pair<Boolean, Boolean> checkBeanAnnotated(Class clazz) {
+        Annotation[] annotations = clazz.getAnnotations();
+        if (clazz.isAnnotationPresent(Configuration.class) || clazz.isAnnotationPresent(Component.class)) {
+            Method[] methods = clazz.getDeclaredMethods();
+            for (Method method : methods) {
+                if (method.isAnnotationPresent(Bean.class)) {
+                    return Pair.of(true, true);
+                }
+            }
+            return Pair.of(true, false);
+        }
+        return Pair.of(false, false);
+    }
+
+    private void praseBeanAnnotatedClass(Class clazz) throws Exception {
+        BeanDefinition beanDefinition = handleTypeAnnot(clazz, true);
+        handleFieldAnnot(clazz, beanDefinition);
+        Map<String,String> methodinfos=handleMethodAnnotAndRegister(clazz);
+        ((BeanAnnotatedDefinition)beanDefinition).putmethodInfos(methodinfos);
+        registerBean(beanDefinition);
+    }
+
+    private void praseClass(Class clazz) throws Exception {
+        BeanDefinition beanDefinition = handleTypeAnnot(clazz, false);
+        handleFieldAnnot(clazz, beanDefinition);
+        registerBean(beanDefinition);
+    }
+
+    private BeanDefinition handleTypeAnnot(Class clazz, boolean isBeanAnnotated) throws Exception {
+        Annotation[] annotations = clazz.getAnnotations();
+        for (Annotation annotation : annotations) {
+            //这两个注解功能基本一样
+            if (annotation instanceof Configuration) {
+                Configuration configAnnot = (Configuration) annotation;
+                if (isBeanAnnotated) {
+                    return new BeanAnnotatedDefinition(getBeanName(configAnnot.name(), clazz), clazz);
+                } else {
+                    return new BeanDefinition(getBeanName(configAnnot.name(), clazz), clazz);
+                }
+            } else if (annotation.annotationType() == Component.class) {
+                Component configAnnot = (Component) annotation;
+                if (isBeanAnnotated) {
+                    return new BeanAnnotatedDefinition(getBeanName(configAnnot.name(), clazz), clazz);
+                }else{
+                    return new BeanDefinition(getBeanName(configAnnot.name(), clazz), clazz);
+                }
+            } else {
+                //ignore
+            }
+        }
+        return null;
+    }
+
+    private void registerBean(BeanDefinition beanDefinition) throws Exception {
+        log.debug("bean: {}", beanDefinition);
         getRegisterBeans().putIfAbsent(beanDefinition.getId(), beanDefinition);
     }
 
@@ -97,26 +138,27 @@ public class AnnotationBeanDefinitionReader extends AbstractBeanDefinitionReader
         }
     }
 
-    /**
-     * TODO 难处理!
-     *
-     * @param clazz
-     */
-    private void handleMethodAnnot(Class clazz) {
+    private Map<String,String> handleMethodAnnotAndRegister(Class clazz) throws BeanDefinitionException {
+        Map<String,String> methodInfos=new HashMap<>();
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
             Annotation[] annotations = method.getAnnotations();
             for (Annotation annotation : annotations) {
                 if (annotation instanceof Bean) {
+                    if(method.getParameterCount()>0){
+                        throw new BeanDefinitionException(String.format("{} ,method annotated by '@Bean' is not support parameter, so let parameter blank",method));
+                    }
                     Bean beanAnnot = (Bean) annotation;
-                    getBeanName(beanAnnot.name(), method.getReturnType());
-                    //TODO 当前这个bean初始化后,执行这个bean方法,类似后置处理器.
+                    String beanName=getBeanName(beanAnnot.name(), method.getName());
+                    BeanDefinition beanDefinition = new BeanDefinition(beanName, method.getReturnType());
+                    methodInfos.put(method.getName(),beanName);
+                    getRegisterBeans().putIfAbsent(beanDefinition.getId(), beanDefinition);
+                    //TODO 似乎不行???当前这个bean初始化后,执行这个bean方法,类似后置处理器.
                 }
             }
         }
-
+        return methodInfos;
     }
-
 
 
     public void setScanPackages(List<String> scanPackages) {

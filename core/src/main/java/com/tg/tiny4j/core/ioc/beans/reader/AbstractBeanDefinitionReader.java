@@ -76,5 +76,11 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
         }
         return annotName;
     }
+    protected String getBeanName(String annotName, String defaultName) {
+        if (StringUtils.isEmpty(annotName)) {
+            return StringUtils.firstCharLowercase(defaultName);
+        }
+        return annotName;
+    }
 
 }

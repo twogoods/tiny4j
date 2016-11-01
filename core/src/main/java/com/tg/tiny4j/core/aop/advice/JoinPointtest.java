@@ -9,6 +9,7 @@ public class JoinPointtest implements Invocation{
     private Object target;
     private Method method;
     private Object[] args;
+    private Class objClass;
 
     public JoinPointtest(Object target, Method method, Object[] args) {
         this.target = target;
@@ -34,5 +35,10 @@ public class JoinPointtest implements Invocation{
     @Override
     public Method getMethod() {
         return method;
+    }
+
+    @Override
+    public Class getObjClass() {
+        return objClass;
     }
 }
