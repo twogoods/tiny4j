@@ -1,6 +1,6 @@
 package com.tg.tiny4j.core.ioc.context;
 
-import com.tg.tiny4j.core.ioc.beans.factory.XmlBeanFactory;
+import com.tg.tiny4j.core.ioc.beans.factory.AutoBeanFactory;
 import com.tg.tiny4j.core.ioc.beans.reader.BeanDefinitionReader;
 import com.tg.tiny4j.core.ioc.beans.reader.XmlBeanDefinitionReader;
 
@@ -18,7 +18,7 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext{
     protected void registerBeans() throws Exception {
         BeanDefinitionReader beanDefinitionReader=new XmlBeanDefinitionReader(configLocation);
         beanDefinitionReader.loadResource();
-        beanFactory=new XmlBeanFactory();
+        beanFactory=new AutoBeanFactory();
         beanFactory.addBeanDefinition(beanDefinitionReader.getRegisterBeans());
     }
 }

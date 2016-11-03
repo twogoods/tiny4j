@@ -48,6 +48,11 @@ public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
         }
     }
 
+    @Override
+    public BeanDefinition handleIntegrationAnnotation(Class clazz) throws ClassNotFoundException {
+        return null;
+    }
+
     /**
      * config默认在classpath下取
      *
@@ -143,5 +148,4 @@ public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
             }
         }
     }
-
 }

@@ -12,6 +12,7 @@
         <module>rest</module>
         <module>web-test</module>
         <module>core</module>
+        <module>integration</module>
     </modules>
 
 

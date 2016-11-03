@@ -28,9 +28,6 @@ public abstract class AbstractBeanFactory implements BeanFactory {
 
     private List<BeanPostProcessor> postProcessorList = new ArrayList<>();
 
-    public AbstractBeanFactory() throws Exception {
-    }
-
     private void selectBeanPostProcessor() throws Exception {
         if (postProcessorList.size() == 0) {
             log.debug("beans :{}", beans);

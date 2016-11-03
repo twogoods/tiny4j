@@ -6,11 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by twogoods on 16/10/27.
+ * Created by twogoods on 16/11/2.
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-public @interface Configuration {
-    String name()default "";
+public @interface Api {
 }

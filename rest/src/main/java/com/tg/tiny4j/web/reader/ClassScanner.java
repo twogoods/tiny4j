@@ -1,4 +1,4 @@
-package com.tg.tiny4j.core.ioc.beans.reader;
+package com.tg.tiny4j.web.reader;
 
 import com.tg.tiny4j.core.ioc.utils.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashSet;
 import java.util.Set;
 
 /**

@@ -1,0 +1,5 @@
+rest可以单独使用,也可以整合这个ioc
+
+web里的初始化在listener里做(单独使用一个listener类,整合使用另一个类)
+
+请求的处理在一个DispatcherServlet里

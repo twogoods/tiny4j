@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * Created by twogoods on 16/10/26.
  */
-public class AnnotationBeanDefinitionReader extends AbstractBeanDefinitionReader {
+public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinitionReader {
     private static Logger log = LogManager.getLogger(AnnotationBeanDefinitionReader.class);
 
     private List<String> scanPackages = new ArrayList<>();
@@ -71,45 +71,64 @@ public class AnnotationBeanDefinitionReader extends AbstractBeanDefinitionReader
 
     private void praseBeanAnnotatedClass(Class clazz) throws Exception {
         BeanDefinition beanDefinition = handleTypeAnnot(clazz, true);
+        if(beanDefinition==null){
+            return;
+        }
         handleFieldAnnot(clazz, beanDefinition);
-        Map<String,String> methodinfos=handleMethodAnnotAndRegister(clazz);
-        ((BeanAnnotatedDefinition)beanDefinition).putmethodInfos(methodinfos);
+        Map<String, String> methodinfos = handleMethodAnnotAndRegister(clazz);
+        ((BeanAnnotatedDefinition) beanDefinition).putmethodInfos(methodinfos);
         registerBean(beanDefinition);
     }
 
     private void praseClass(Class clazz) throws Exception {
         BeanDefinition beanDefinition = handleTypeAnnot(clazz, false);
+        if(beanDefinition==null){
+            return;
+        }
         handleFieldAnnot(clazz, beanDefinition);
         registerBean(beanDefinition);
+    }
+
+    public abstract BeanDefinition handleIntegrationAnnotation(Class clazz) throws ClassNotFoundException;
+
+    /**
+     * TODO annotation去重
+     */
+    private Annotation[] deDuplicationAnnotation(Annotation[] annotations) {
+        return annotations;
     }
 
     private BeanDefinition handleTypeAnnot(Class clazz, boolean isBeanAnnotated) throws Exception {
         Annotation[] annotations = clazz.getAnnotations();
         for (Annotation annotation : annotations) {
-            //这两个注解功能基本一样
-            if (annotation instanceof Configuration) {
-                Configuration configAnnot = (Configuration) annotation;
+            System.out.println(annotation + " is? " + annotation.annotationType().isAnnotationPresent(Component.class));
+            if (annotation.annotationType() == Component.class) {
+                //Component注解
+                Component configAnnot = (Component) annotation;
                 if (isBeanAnnotated) {
                     return new BeanAnnotatedDefinition(getBeanName(configAnnot.name(), clazz), clazz);
                 } else {
                     return new BeanDefinition(getBeanName(configAnnot.name(), clazz), clazz);
                 }
-            } else if (annotation.annotationType() == Component.class) {
-                Component configAnnot = (Component) annotation;
-                if (isBeanAnnotated) {
-                    return new BeanAnnotatedDefinition(getBeanName(configAnnot.name(), clazz), clazz);
-                }else{
-                    return new BeanDefinition(getBeanName(configAnnot.name(), clazz), clazz);
+            } else if (annotation.annotationType().isAnnotationPresent(Component.class)) {
+                //Configuration
+                if (annotation.annotationType() == Configuration.class) {
+                    Configuration configAnnot = (Configuration) annotation;
+                    if (isBeanAnnotated) {
+                        return new BeanAnnotatedDefinition(getBeanName(configAnnot.name(), clazz), clazz);
+                    } else {
+                        return new BeanDefinition(getBeanName(configAnnot.name(), clazz), clazz);
+                    }
                 }
-            } else {
-                //ignore
             }
         }
-        return null;
+        //有其他的注解,这些的解析交给子类完成
+        return handleIntegrationAnnotation(clazz);
     }
 
     private void registerBean(BeanDefinition beanDefinition) throws Exception {
         log.debug("bean: {}", beanDefinition);
+        //TODO 查重
         getRegisterBeans().putIfAbsent(beanDefinition.getId(), beanDefinition);
     }
 
@@ -138,20 +157,20 @@ public class AnnotationBeanDefinitionReader extends AbstractBeanDefinitionReader
         }
     }
 
-    private Map<String,String> handleMethodAnnotAndRegister(Class clazz) throws BeanDefinitionException {
-        Map<String,String> methodInfos=new HashMap<>();
+    private Map<String, String> handleMethodAnnotAndRegister(Class clazz) throws BeanDefinitionException {
+        Map<String, String> methodInfos = new HashMap<>();
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
             Annotation[] annotations = method.getAnnotations();
             for (Annotation annotation : annotations) {
                 if (annotation instanceof Bean) {
-                    if(method.getParameterCount()>0){
-                        throw new BeanDefinitionException(String.format("{} ,method annotated by '@Bean' is not support parameter, so let parameter blank",method));
+                    if (method.getParameterCount() > 0) {
+                        throw new BeanDefinitionException(String.format("{} ,method annotated by '@Bean' is not support parameter, so let parameter blank", method));
                     }
                     Bean beanAnnot = (Bean) annotation;
-                    String beanName=getBeanName(beanAnnot.name(), method.getName());
+                    String beanName = getBeanName(beanAnnot.name(), method.getName());
                     BeanDefinition beanDefinition = new BeanDefinition(beanName, method.getReturnType());
-                    methodInfos.put(method.getName(),beanName);
+                    methodInfos.put(method.getName(), beanName);
                     getRegisterBeans().putIfAbsent(beanDefinition.getId(), beanDefinition);
                     //TODO 似乎不行???当前这个bean初始化后,执行这个bean方法,类似后置处理器.
                 }

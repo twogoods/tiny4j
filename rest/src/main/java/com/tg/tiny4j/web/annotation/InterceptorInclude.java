@@ -1,4 +1,4 @@
-package com.tg.tiny4j.core.ioc.annotation;
+package com.tg.tiny4j.web.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,11 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by twogoods on 16/10/27.
+ * Created by twogoods on 16/11/1.
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Component
-public @interface Configuration {
-    String name()default "";
+public @interface InterceptorInclude {
+    String[] interceptors();
 }
