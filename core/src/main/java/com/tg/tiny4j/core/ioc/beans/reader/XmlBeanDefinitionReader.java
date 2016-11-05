@@ -1,12 +1,12 @@
 package com.tg.tiny4j.core.ioc.beans.reader;
 
+import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.beans.BeanPropertyValue;
 import com.tg.tiny4j.core.ioc.beans.BeanReference;
 import com.tg.tiny4j.core.ioc.exception.BeanDefinitionException;
 import com.tg.tiny4j.core.ioc.resource.ResourceLoad;
-import com.tg.tiny4j.core.ioc.utils.StringUtils;
-import com.tg.tiny4j.core.ioc.utils.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;

@@ -1,12 +1,11 @@
-package com.tg.integration.context;
+package com.tg.tiny4j.integration.context;
 
-import com.tg.integration.reader.WebAppBeanDefinitionReader;
+import com.tg.tiny4j.integration.reader.WebAppBeanDefinitionReader;
 import com.tg.tiny4j.core.ioc.beans.factory.AutoBeanFactory;
 import com.tg.tiny4j.core.ioc.beans.reader.BeanDefinitionReader;
 import com.tg.tiny4j.core.ioc.context.AbstractApplicationContext;
 import com.tg.tiny4j.web.metadata.ControllerInfo;
 import com.tg.tiny4j.web.reader.AbstractControllerReader;
-import com.tg.tiny4j.web.reader.WebControllerReader;
 
 import java.util.Map;
 
@@ -24,6 +23,7 @@ public class WebApplicationContext extends AbstractApplicationContext {
 
     protected void registerBeans() throws Exception {
         BeanDefinitionReader beanDefinitionReader = new WebAppBeanDefinitionReader(reader);
+        //读取bean信息
         beanDefinitionReader.loadResource();
         beanFactory = new AutoBeanFactory();
         beanFactory.addBeanDefinition(beanDefinitionReader.getRegisterBeans());

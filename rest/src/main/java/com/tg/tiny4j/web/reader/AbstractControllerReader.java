@@ -1,5 +1,6 @@
 package com.tg.tiny4j.web.reader;
 
+import com.tg.tiny4j.commons.utils.StringUtils;
 import com.tg.tiny4j.web.metadata.ControllerInfo;
 import com.tg.tiny4j.web.metadata.RequestHandleInfo;
 import org.apache.logging.log4j.LogManager;
@@ -27,8 +28,18 @@ public abstract class AbstractControllerReader implements Reader{
          * 拦截器的先后执行顺序
          */
         ControllerInfo controllerInfo=new ControllerInfo();
+        controllerInfo.setName(getBeanName(null,clazz));
+        controllerInfo.setClassName(clazz.getName());
+        controllerInfo.setClazz(clazz);
         apis.put(controllerInfo.getName(),controllerInfo);
         return controllerInfo;
+    }
+
+    protected String getBeanName(String annotName, Class clazz) {
+        if (StringUtils.isEmpty(annotName)) {
+            return StringUtils.firstCharLowercase(clazz.getSimpleName());
+        }
+        return annotName;
     }
 
     public Map<String, ControllerInfo> getApis() {

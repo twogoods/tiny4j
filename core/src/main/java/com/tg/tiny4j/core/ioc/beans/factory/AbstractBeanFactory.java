@@ -1,15 +1,14 @@
 package com.tg.tiny4j.core.ioc.beans.factory;
 
+import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.core.aop.AopProxy;
 import com.tg.tiny4j.core.aop.AutoSetterCglibAopProxy;
-import com.tg.tiny4j.core.aop.CglibAopProxy;
 import com.tg.tiny4j.core.aop.advice.AopAdvice;
 import com.tg.tiny4j.core.aop.advice.BeanAnnotatedAopInterceptor;
 import com.tg.tiny4j.core.aop.advice.Target;
 import com.tg.tiny4j.core.ioc.beans.*;
 import com.tg.tiny4j.core.ioc.exception.BeanException;
-import com.tg.tiny4j.core.ioc.utils.StringUtils;
-import com.tg.tiny4j.core.ioc.utils.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

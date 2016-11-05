@@ -1,8 +1,4 @@
-package com.tg.tiny4j.core.ioc.utils;
-
-import javax.smartcardio.ATR;
-import java.text.Collator;
-import java.util.*;
+package com.tg.tiny4j.commons.utils;
 
 /**
  * Created by twogoods on 16/10/26.

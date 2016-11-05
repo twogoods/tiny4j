@@ -1,6 +1,6 @@
 package com.tg.tiny4j.web.reader;
 
-import com.tg.tiny4j.core.ioc.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -7,11 +7,13 @@
 
     <context-param>
         <param-name>component-scan</param-name>
-        <param-value>con.tg</param-value>
+        <param-value>com.tg.web.controller</param-value>
     </context-param>
 
     <listener>
-        <listener-class>com.tg.tiny4j.web.contextlistener.ContextLoaderListener</listener-class>
+        <!--<listener-class>com.tg.tiny4j.integration.context.listener.WebAppLoaderListener</listener-class>-->
+        <listener-class>com.tg.web.contextlistener.WebAppLoaderListener</listener-class>
+        <listener-class>com.tg.tiny4j.web.contextlistener.SingleRestLoaderListener</listener-class>
     </listener>
 
 </web-app>

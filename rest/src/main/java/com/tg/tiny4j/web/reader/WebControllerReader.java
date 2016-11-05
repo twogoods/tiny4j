@@ -21,6 +21,8 @@ public class WebControllerReader extends AbstractControllerReader {
             for (String p : packageConfig.split(",")) {
                 ClassScanner.getClasses(ClassScanner.getPathByPackage(p), classSet);
             }
+
+            log.info("get class:{}",classSet);
             for (Class clazz : classSet) {
                 read(clazz);
             }

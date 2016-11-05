@@ -1,7 +1,5 @@
-package com.tg.integration.reader;
+package com.tg.tiny4j.web.integration;
 
-import com.tg.tiny4j.core.ioc.beans.factory.BeanFactory;
-import com.tg.tiny4j.web.metadata.ControllerInfo;
 import com.tg.tiny4j.web.reader.AbstractControllerReader;
 
 /**

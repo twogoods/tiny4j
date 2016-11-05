@@ -1,9 +1,9 @@
 package com.tg.tiny4j.core.ioc.beans.reader;
 
+import com.tg.tiny4j.commons.utils.StringUtils;
 import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.exception.ConfigurationException;
 import com.tg.tiny4j.core.ioc.resource.ResourceLoad;
-import com.tg.tiny4j.core.ioc.utils.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

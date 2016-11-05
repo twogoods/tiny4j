@@ -6,7 +6,7 @@ import com.tg.tiny4j.core.ioc.beans.BeanPropertyValue;
 import com.tg.tiny4j.core.ioc.beans.BeanReference;
 import com.tg.tiny4j.core.ioc.exception.BeanDefinitionException;
 import com.tg.tiny4j.core.ioc.annotation.*;
-import com.tg.tiny4j.core.ioc.utils.Pair;
+import com.tg.tiny4j.commons.data.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,6 +47,9 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
                 praseBeanAnnotatedClass(clazz);
             } else if (result.getL()) {
                 praseClass(clazz);
+            } else {
+                //别的注解
+                praseUnknowAnnotatedClass(clazz);
             }
         }
     }
@@ -56,7 +59,6 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
      * pair的left指明是否是配置的bean,right指是否有@Bean注解
      */
     private Pair<Boolean, Boolean> checkBeanAnnotated(Class clazz) {
-        Annotation[] annotations = clazz.getAnnotations();
         if (clazz.isAnnotationPresent(Configuration.class) || clazz.isAnnotationPresent(Component.class)) {
             Method[] methods = clazz.getDeclaredMethods();
             for (Method method : methods) {
@@ -71,7 +73,7 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
 
     private void praseBeanAnnotatedClass(Class clazz) throws Exception {
         BeanDefinition beanDefinition = handleTypeAnnot(clazz, true);
-        if(beanDefinition==null){
+        if (beanDefinition == null) {
             return;
         }
         handleFieldAnnot(clazz, beanDefinition);
@@ -82,7 +84,16 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
 
     private void praseClass(Class clazz) throws Exception {
         BeanDefinition beanDefinition = handleTypeAnnot(clazz, false);
-        if(beanDefinition==null){
+        if (beanDefinition == null) {
+            return;
+        }
+        handleFieldAnnot(clazz, beanDefinition);
+        registerBean(beanDefinition);
+    }
+
+    private void praseUnknowAnnotatedClass(Class clazz) throws Exception {
+        BeanDefinition beanDefinition = handleIntegrationAnnotation(clazz);
+        if (beanDefinition == null) {
             return;
         }
         handleFieldAnnot(clazz, beanDefinition);
@@ -92,16 +103,68 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
     public abstract BeanDefinition handleIntegrationAnnotation(Class clazz) throws ClassNotFoundException;
 
     /**
-     * TODO annotation去重
+     * TODO 重构,annotation去重,去掉多余的 @Component
+     * 目前只有@Component一个注解是ElementType.ANNOTATION_TYPE的,且只有@Component和@Configuration可以注解类
+     * 那么只针对当前model下定义的这些注解做特殊情况处理
+     * 后续重构,支持任一的注解检查
      */
     private Annotation[] deDuplicationAnnotation(Annotation[] annotations) {
+        List<Integer> componentIndex = new ArrayList<>(annotations.length);
+        boolean flag = false;
+        for (int i = 0; i < annotations.length; i++) {
+            //有没有Component注解
+            if (annotations[i].annotationType() == Component.class) {
+                componentIndex.add(i);
+            } else {
+                //有没有被Component注解的注解
+                if (isAnnotated(annotations[i].annotationType(), Component.class)) {
+                    flag = true;
+                }
+            }
+        }
+        if (flag && componentIndex.size() > 0) {
+            //去掉多余的Component注解
+            Annotation[] result = new Annotation[annotations.length - componentIndex.size()];
+            for (int i = 0, j = 0, index = 0; i < annotations.length; i++) {
+                if(index<componentIndex.size()){
+                    if (i == componentIndex.get(index)) {
+                        index++;
+                    } else {
+                        result[j] = annotations[i];
+                        j++;
+                    }
+                }else{
+                    result[j] = annotations[i];
+                    j++;
+                }
+
+            }
+            return result;
+        }
         return annotations;
+    }
+
+    private boolean isAnnotated(Class front, Class after) {
+        if (front.isAnnotationPresent(after)) {
+            return true;
+        } else {
+            if (front.isAnnotation()) {
+                Annotation[] annotations = front.getAnnotations();
+                for (Annotation annotation : annotations) {
+                    if (isAnnotated(annotation.annotationType(), after)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private BeanDefinition handleTypeAnnot(Class clazz, boolean isBeanAnnotated) throws Exception {
         Annotation[] annotations = clazz.getAnnotations();
+        annotations=deDuplicationAnnotation(annotations);
         for (Annotation annotation : annotations) {
-            System.out.println(annotation + " is? " + annotation.annotationType().isAnnotationPresent(Component.class));
+            log.debug(annotation + " is component ? " + annotation.annotationType().isAnnotationPresent(Component.class));
             if (annotation.annotationType() == Component.class) {
                 //Component注解
                 Component configAnnot = (Component) annotation;
@@ -128,8 +191,9 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
 
     private void registerBean(BeanDefinition beanDefinition) throws Exception {
         log.debug("bean: {}", beanDefinition);
-        //TODO 查重
-        getRegisterBeans().putIfAbsent(beanDefinition.getId(), beanDefinition);
+        if(getRegisterBeans().putIfAbsent(beanDefinition.getId(), beanDefinition)!=null){
+            throw new BeanDefinitionException(String.format("bean is duplicate,bean name is '%s'", beanDefinition.getId()));
+        }
     }
 
     private void handleFieldAnnot(Class clazz, BeanDefinition beanDefinition) throws Exception {
@@ -183,4 +247,5 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
     public void setScanPackages(List<String> scanPackages) {
         this.scanPackages.addAll(scanPackages);
     }
+
 }

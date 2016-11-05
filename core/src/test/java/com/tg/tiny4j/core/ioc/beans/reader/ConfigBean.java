@@ -1,13 +1,11 @@
 package com.tg.tiny4j.core.ioc.beans.reader;
 
-import com.tg.tiny4j.core.ioc.annotation.Bean;
-import com.tg.tiny4j.core.ioc.annotation.Configuration;
-import com.tg.tiny4j.core.ioc.annotation.Inject;
-import com.tg.tiny4j.core.ioc.annotation.Value;
+import com.tg.tiny4j.core.ioc.annotation.*;
 
 /**
  * Created by twogoods on 16/10/31.
  */
+@Component
 @Configuration
 public class ConfigBean {
 

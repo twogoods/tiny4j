@@ -1,9 +1,9 @@
 package com.tg.tiny4j.core.aop;
 
+import com.tg.tiny4j.commons.utils.StringUtils;
 import com.tg.tiny4j.core.aop.advice.AopAdvice;
 import com.tg.tiny4j.core.aop.advice.AutoSetterCglibMethodinvocation;
 import com.tg.tiny4j.core.aop.exception.AdviceDefinitionException;
-import com.tg.tiny4j.core.ioc.utils.StringUtils;
 import net.sf.cglib.core.Signature;
 import net.sf.cglib.proxy.InterfaceMaker;
 import net.sf.cglib.proxy.MethodProxy;

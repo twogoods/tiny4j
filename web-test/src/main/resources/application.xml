@@ -2,16 +2,7 @@
 <beans>
     <configs>
         <property-file>application.properties</property-file>
-        <component-scan>${code4j.component-scan:com.tg}</component-scan>
+        <component-scan>${code4j.component-scan:com.tg.web.controller}</component-scan>
     </configs>
-
-
-    <bean id="userDao" class="com.tg.web.dao.UserDao"></bean>
-
-    <bean id="userService" class="com.tg.web.service.UserService">
-        <property name="s1" value="two"></property>
-        <property name="s2" value="goods"></property>
-        <property name="userDao" ref="userDao"></property>
-    </bean>
 
 </beans>

@@ -13,9 +13,10 @@
 
 
     <dependencies>
+
         <dependency>
             <groupId>com.twogoods.tiny4j</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>commons</artifactId>
             <version>0.0.1</version>
         </dependency>
         <dependency>

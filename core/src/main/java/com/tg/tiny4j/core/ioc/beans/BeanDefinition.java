@@ -29,6 +29,12 @@ public class BeanDefinition {
         clazz=Class.forName(classname);
     }
 
+    public BeanDefinition(String id, String classname, Class clazz) {
+        this.id = id;
+        this.classname = classname;
+        this.clazz = clazz;
+    }
+
     public BeanDefinition(String id, Class clazz) {
         this.id = id;
         this.clazz = clazz;

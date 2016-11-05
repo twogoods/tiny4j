@@ -4,6 +4,8 @@ import com.tg.tiny4j.web.metadata.ControllerInfo;
 import com.tg.tiny4j.web.reader.ClassScanner;
 import com.tg.tiny4j.web.reader.Reader;
 import com.tg.tiny4j.web.reader.WebControllerReader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -15,10 +17,12 @@ import java.util.Set;
  * Created by twogoods on 16/11/2.
  */
 public class SingleRestLoaderListener implements ServletContextListener {
+    private static Logger log= LogManager.getLogger(SingleRestLoaderListener.class);
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        String packages = servletContextEvent.getServletContext().getAttribute("component-scan").toString();
+        String packages = servletContextEvent.getServletContext().getInitParameter("component-scan").toString();
+        log.debug("auto package {}",packages);
         WebControllerReader webControllerReader = new WebControllerReader();
         webControllerReader.loadClass(packages);
         servletContextEvent.getServletContext().setAttribute("run_mode","withcontainer");
