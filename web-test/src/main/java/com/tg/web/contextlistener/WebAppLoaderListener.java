@@ -17,18 +17,24 @@ import javax.servlet.ServletContextListener;
  * Created by twogoods on 16/11/2.
  */
 public class WebAppLoaderListener extends AbstractWebContextListener {
-    private static Logger log= LogManager.getLogger(WebAppLoaderListener.class);
+    private static Logger log = LogManager.getLogger(WebAppLoaderListener.class);
+
+    final WebAppControllerReader webAppControllerReader = new WebAppControllerReader();
 
     @Override
     public void registerHandle(HandleRegistry registry) {
-        final WebAppControllerReader webAppControllerReader=new WebAppControllerReader();
-        HandleAnnotation handle=new HandleAnnotation() {
+        HandleAnnotation handle = new HandleAnnotation() {
             @Override
             public BeanDefinition handle(Class clazz) throws ClassNotFoundException {
-                ControllerInfo controllerInfo=webAppControllerReader.read(clazz);
+                ControllerInfo controllerInfo = webAppControllerReader.read(clazz);
                 return new BeanDefinition(controllerInfo.getName(), controllerInfo.getClassName());
             }
         };
         registry.addHandle(handle);
+    }
+
+    @Override
+    public void requestMapInitialized(ServletContextEvent servletContextEvent) {
+        webAppControllerReader.initRequestMap();
     }
 }

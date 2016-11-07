@@ -13,7 +13,7 @@
     <listener>
         <!--<listener-class>com.tg.tiny4j.integration.context.listener.WebAppLoaderListener</listener-class>-->
         <listener-class>com.tg.web.contextlistener.WebAppLoaderListener</listener-class>
-        <listener-class>com.tg.tiny4j.web.contextlistener.SingleRestLoaderListener</listener-class>
+        <!--<listener-class>com.tg.tiny4j.web.contextlistener.SingleRestLoaderListener</listener-class>-->
     </listener>
 
 </web-app>

@@ -6,10 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by twogoods on 16/11/1.
+ * Created by twogoods on 16/11/7.
  */
-@Target({ElementType.PARAMETER})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PathVariable {
-    String value();
+public @interface Interceptor {
+    String name() default "";
+    String[] pathPatterns();
+    String[] excludePathPatterns();
+    int order() default 0;
 }

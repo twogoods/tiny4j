@@ -1,18 +1,16 @@
 package com.tg.tiny4j.web.reader;
 
-import com.tg.tiny4j.web.metadata.ControllerInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * Created by twogoods on 16/11/2.
  */
-public class WebControllerReader extends AbstractControllerReader {
-    private static Logger log = LogManager.getLogger(WebControllerReader.class);
+public class WebScanedClassReader extends AbstractClassReader {
+    private static Logger log = LogManager.getLogger(WebScanedClassReader.class);
 
     Set<Class> classSet = new HashSet<>();
 

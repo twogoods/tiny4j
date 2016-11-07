@@ -5,7 +5,7 @@ import com.tg.tiny4j.core.ioc.beans.factory.AutoBeanFactory;
 import com.tg.tiny4j.core.ioc.beans.reader.BeanDefinitionReader;
 import com.tg.tiny4j.core.ioc.context.AbstractApplicationContext;
 import com.tg.tiny4j.web.metadata.ControllerInfo;
-import com.tg.tiny4j.web.reader.AbstractControllerReader;
+import com.tg.tiny4j.web.reader.AbstractClassReader;
 
 import java.util.Map;
 
@@ -13,9 +13,9 @@ import java.util.Map;
  * Created by twogoods on 16/11/2.
  */
 public class WebApplicationContext extends AbstractApplicationContext {
-    private AbstractControllerReader reader;
+    private AbstractClassReader reader;
 
-    public WebApplicationContext(AbstractControllerReader reader) throws Exception {
+    public WebApplicationContext(AbstractClassReader reader) throws Exception {
         this.reader=reader;
         refresh();
         setControllerInstance();

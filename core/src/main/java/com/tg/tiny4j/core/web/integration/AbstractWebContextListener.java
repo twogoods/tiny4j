@@ -17,6 +17,8 @@ public abstract class AbstractWebContextListener implements ServletContextListen
 
     public abstract void registerHandle(HandleRegistry registry);
 
+    public abstract void requestMapInitialized(ServletContextEvent servletContextEvent);
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
 
@@ -24,6 +26,9 @@ public abstract class AbstractWebContextListener implements ServletContextListen
         try {
             registerHandle(registry);
             webApplicationContext = new WebApplicationContext(registry.getHandle());
+
+            requestMapInitialized(servletContextEvent);
+
             servletContextEvent.getServletContext().setAttribute("run_mode", "withcontainer");
             servletContextEvent.getServletContext().setAttribute("root_applicationcontext", webApplicationContext);
         } catch (Exception e) {

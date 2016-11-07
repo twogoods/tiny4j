@@ -4,7 +4,6 @@ import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.beans.reader.XmlBeanDefinitionReader;
 import com.tg.tiny4j.web.metadata.ControllerInfo;
 import com.tg.tiny4j.web.reader.Reader;
-import com.tg.tiny4j.web.reader.WebControllerReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
