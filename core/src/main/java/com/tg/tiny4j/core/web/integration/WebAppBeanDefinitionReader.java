@@ -24,7 +24,7 @@ public class WebAppBeanDefinitionReader extends XmlBeanDefinitionReader {
     }
 
     @Override
-    public BeanDefinition handleIntegrationAnnotation(Class clazz) throws ClassNotFoundException {
+    public BeanDefinition handleIntegrationAnnotation(Class clazz) throws Exception {
         log.info("do prase:{}",clazz);
         return handle.handle(clazz);
     }

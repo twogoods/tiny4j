@@ -2,6 +2,7 @@ package com.tg.tiny4j.integration.reader;
 
 import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.beans.reader.XmlBeanDefinitionReader;
+import com.tg.tiny4j.web.metadata.BaseInfo;
 import com.tg.tiny4j.web.metadata.ControllerInfo;
 import com.tg.tiny4j.web.reader.Reader;
 import org.apache.logging.log4j.LogManager;
@@ -26,10 +27,10 @@ public class WebAppBeanDefinitionReader extends XmlBeanDefinitionReader {
     }
 
     @Override
-    public BeanDefinition handleIntegrationAnnotation(Class clazz) throws ClassNotFoundException {
+    public BeanDefinition handleIntegrationAnnotation(Class clazz) throws Exception {
         log.info("do prase:{}",clazz);
 
-        ControllerInfo controllerInfo = reader.read(clazz);
-        return new BeanDefinition(controllerInfo.getName(), controllerInfo.getClassName());
+        BaseInfo baseInfo = reader.read(clazz);
+        return new BeanDefinition(baseInfo.getName(), baseInfo.getClassName());
     }
 }

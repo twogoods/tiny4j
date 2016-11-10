@@ -100,7 +100,7 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
         registerBean(beanDefinition);
     }
 
-    public abstract BeanDefinition handleIntegrationAnnotation(Class clazz) throws ClassNotFoundException;
+    public abstract BeanDefinition handleIntegrationAnnotation(Class clazz) throws Exception;
 
     /**
      * TODO 重构,annotation去重,去掉多余的 @Component

@@ -1,19 +1,13 @@
 package com.tg.tiny4j.web.reader;
 
-import com.tg.tiny4j.commons.data.Pair;
 import com.tg.tiny4j.commons.utils.StringUtils;
 import com.tg.tiny4j.web.annotation.*;
-import com.tg.tiny4j.web.metadata.ControllerInfo;
-import com.tg.tiny4j.web.metadata.InterceptorInfo;
-import com.tg.tiny4j.web.metadata.RequestHandleInfo;
+import com.tg.tiny4j.web.metadata.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,20 +16,10 @@ import java.util.Map;
 public abstract class AbstractClassReader implements Reader {
     private static Logger log = LogManager.getLogger(AbstractClassReader.class);
 
-
-    //TODO 下面5个放在一个类里
-    private Map<String, ControllerInfo> apis = new HashMap<>();
-
-    private Map<String, InterceptorInfo> interceptors = new HashMap<>();
-
-    private List<InterceptorInfo> interceptorList = new ArrayList<>();
-
-    private Map<String, RequestHandleInfo> requestHandleMap = new HashMap<>();
-
-    private Map<String, Pair<String,String>> exceptionHandle = new HashMap<>();
+    private RequestMapper requestMapper = new RequestMapper();
 
     @Override
-    public ControllerInfo read(Class clazz) {
+    public BaseInfo read(Class clazz) throws Exception {
         /**url,controller对象,方法,请求方法,拦截器信息
          * url对应一个请求方法<methodname,objname(controller名),requestmethod(请求方法),是否CROS,拦截器信息>
          * 在一个map,存controller对象,或者ioc里拿
@@ -48,40 +32,46 @@ public abstract class AbstractClassReader implements Reader {
             //TODO 配置的全局的contextPath
             String apiBaseUrl = api.value();
             ControllerInfo controllerInfo = new ControllerInfo();
-            String beanName = getBeanName(apiBaseUrl, clazz);
+            String beanName = getBeanName(api.name(), clazz);
             controllerInfo.setName(beanName);
             controllerInfo.setClassName(clazz.getName());
             controllerInfo.setClazz(clazz);
-
-            apis.put(beanName, controllerInfo);
-            prasemethods(clazz.getMethods(), apiBaseUrl, clazz.getName());
+            requestMapper.addApis(beanName, controllerInfo);
+            prasemethods(clazz.getMethods(), apiBaseUrl, clazz.getName(),beanName);
             return controllerInfo;
         } else if (clazz.isAnnotationPresent(Interceptor.class)) {
             Interceptor interceptor = (Interceptor) clazz.getAnnotation(Interceptor.class);
             InterceptorInfo interceptorInfo = new InterceptorInfo();
-            interceptorInfo.setName(interceptor.name());
+            String beanName=getBeanName(interceptor.name(), clazz);
+            interceptorInfo.setName(beanName);
+            interceptorInfo.setClassName(clazz.getName());
+            interceptorInfo.setClazz(clazz);
             interceptorInfo.setPathPatterns(interceptor.pathPatterns());
             interceptorInfo.setExcludePathPatterns(interceptor.excludePathPatterns());
             interceptorInfo.setOrder(interceptor.order());
-            interceptorList.add(interceptorInfo);
+            requestMapper.addInterceptors(beanName,interceptorInfo);
+            requestMapper.addInterceptorList(interceptorInfo);
+            return interceptorInfo;
         }
         return null;
     }
 
 
-    private void prasemethods(Method[] methods, String baseUrl, String className) {
+    private void prasemethods(Method[] methods, String baseUrl, String className,String beanName) throws Exception {
         for (Method method : methods) {
             // 必须要有RequestMapping 才能响应请求
             if (method.isAnnotationPresent(RequestMapping.class)) {
                 Annotation[] annotations = method.getAnnotations();
                 RequestHandleInfo requestHandleInfo = new RequestHandleInfo();
                 requestHandleInfo.setMethodName(method.getName());
+                requestHandleInfo.setMethod(method);
                 requestHandleInfo.setClassName(className);
                 String requestUrl = baseUrl;
                 for (Annotation annotation : annotations) {
                     if (annotation.annotationType() == RequestMapping.class) {
                         String url = ((RequestMapping) annotation).mapUrl();
                         requestUrl = urlJoin(baseUrl, url);
+                        requestHandleInfo.setRequestUrl(requestUrl);
                         requestHandleInfo.setRequestmethod(((RequestMapping) annotation).method());
                     } else if (annotation.annotationType() == CROS.class) {
                         requestHandleInfo.setCros(true);
@@ -91,21 +81,67 @@ public abstract class AbstractClassReader implements Reader {
                         requestHandleInfo.setIncludeInterceptors(((InterceptorInclude) annotation).interceptors());
                     }
                 }
-                requestHandleMap.put(requestUrl, requestHandleInfo);
+                requestMapper.addRequestHandleMap(requestUrl, requestHandleInfo);
             } else if (method.isAnnotationPresent(ExceptionHandler.class)) {
                 ExceptionHandler exceptionHandler = method.getAnnotation(ExceptionHandler.class);
-                //TODO 异常信息里异常类查重
-                exceptionHandle.put(className,Pair.of(exceptionHandler.value().getName(), method.getName()));
+                requestMapper.addExceptionHandle(className, new ExceptionHandleInfo(exceptionHandler.value().getName(), method.getName()));
             }
         }
     }
 
-    public void initRequestMap() {
-        System.out.println(apis);
-        System.out.println(interceptors);
-        System.out.println(interceptorList);
-        System.out.println(requestHandleMap);
-        System.out.println(exceptionHandle);
+    public void initRequestMap() throws Exception {
+        /**
+         * 处理拦截器关系
+         * 拦截器列表排序
+         * 每个请求对象的处理函数依次检查,要拦截的放入doInterceptors里
+         */
+        requestMapper.sortInterceptorList();
+        Map<String, RequestHandleInfo> requestHandleInfoMap = requestMapper.getRequestHandleMap();
+        for (String requestUrl : requestHandleInfoMap.keySet()) {
+            RequestHandleInfo info = requestHandleInfoMap.get(requestUrl);
+            //先检查  excludeInterceptors  再includeInterceptors
+            for (InterceptorInfo interceptor : requestMapper.getInterceptorList()) {
+                //优先检查响应方法自己注解上的拦截器信息
+                if(info.getExcludeInterceptors().contains(interceptor.getName())){
+                    continue;
+                }
+                if(info.getIncludeInterceptors().contains(interceptor.getName())){
+                    info.addDoInterceptors(interceptor.getName());
+                    continue;
+                }
+
+                //匹配url
+                String[] excludes = interceptor.getExcludePathPatterns();
+                for (String exclude : excludes) {
+                    //TODO url的匹配
+                    if (requestUrl.startsWith(exclude)){
+                        continue;
+                    }
+                }
+
+                String[] includes=interceptor.getPathPatterns();
+                for (String include: includes) {
+                    if (requestUrl.startsWith(include)){
+                        info.addDoInterceptors(interceptor.getName());
+                    }
+                }
+            }
+        }
+        System.out.println(requestMapper);
+    }
+
+
+    public void instance4SingleMode() throws Exception {
+        //-----初始化controller类
+        Map<String, ControllerInfo> controllerInfoMap = requestMapper.getApis();
+        for (String key : controllerInfoMap.keySet()) {
+            ControllerInfo controller = controllerInfoMap.get(key);
+            controller.setObject(controller.getClazz().newInstance());
+        }
+        //-----初始化interceptor类
+        for (InterceptorInfo interceptor : requestMapper.getInterceptorList()) {
+            interceptor.setObj(interceptor.getClazz().newInstance());
+        }
     }
 
     private String urlJoin(String frontUrl, String afterUrl) {
@@ -131,11 +167,8 @@ public abstract class AbstractClassReader implements Reader {
         return annotName;
     }
 
-    public Map<String, ControllerInfo> getApis() {
-        return apis;
-    }
-
-    public Map<String, RequestHandleInfo> getRequestHandleMap() {
-        return requestHandleMap;
+    @Override
+    public RequestMapper getRequestMapper() {
+        return requestMapper;
     }
 }

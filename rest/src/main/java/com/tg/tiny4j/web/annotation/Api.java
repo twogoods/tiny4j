@@ -12,5 +12,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Api {
     String value() default "";
+    String name() default "";
     String note() default "";
 }

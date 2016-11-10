@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Interceptor {
     String name() default "";
-    String[] pathPatterns();
-    String[] excludePathPatterns();
+    String[] pathPatterns() default {};
+    String[] excludePathPatterns() default {};
     int order() default 0;
 }

@@ -12,6 +12,8 @@ public class WebApplicationContext extends AbstractApplicationContext {
 
     public WebApplicationContext(HandleAnnotation handle) throws Exception {
         this.handle=handle;
+
+        System.out.println("handle in :"+handle);
         refresh();
     }
 

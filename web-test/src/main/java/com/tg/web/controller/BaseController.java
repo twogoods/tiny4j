@@ -13,9 +13,18 @@ public class BaseController {
     @RequestMapping(mapUrl = "/test",method = HttpMethod.GET)
     @ExceptionHandler(Exception.class)
     @CROS
-    @InterceptorExclude(interceptors={"testinterceptor"})
-    @InterceptorInclude(interceptors={"testinterceptor"})
-    private String test(@PathVariable("id")String id,@RequestBody User user){
+    @InterceptorExclude(interceptors={"aInterceptor"})
+    public String test(@PathVariable("id")String id,@RequestBody User user){
         return "";
     }
+
+    @RequestMapping(mapUrl = "/index",method = HttpMethod.GET)
+    @InterceptorExclude(interceptors={"bInterceptor"})
+    @ExceptionHandler(Exception.class)
+    @CROS
+    public String index(){
+        return "";
+    }
+
+
 }

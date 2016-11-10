@@ -49,7 +49,7 @@ public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
     }
 
     @Override
-    public BeanDefinition handleIntegrationAnnotation(Class clazz) throws ClassNotFoundException {
+    public BeanDefinition handleIntegrationAnnotation(Class clazz) throws Exception {
         return null;
     }
 

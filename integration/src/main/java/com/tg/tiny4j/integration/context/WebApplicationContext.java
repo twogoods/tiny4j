@@ -5,6 +5,7 @@ import com.tg.tiny4j.core.ioc.beans.factory.AutoBeanFactory;
 import com.tg.tiny4j.core.ioc.beans.reader.BeanDefinitionReader;
 import com.tg.tiny4j.core.ioc.context.AbstractApplicationContext;
 import com.tg.tiny4j.web.metadata.ControllerInfo;
+import com.tg.tiny4j.web.metadata.InterceptorInfo;
 import com.tg.tiny4j.web.reader.AbstractClassReader;
 
 import java.util.Map;
@@ -16,9 +17,10 @@ public class WebApplicationContext extends AbstractApplicationContext {
     private AbstractClassReader reader;
 
     public WebApplicationContext(AbstractClassReader reader) throws Exception {
-        this.reader=reader;
+        this.reader = reader;
         refresh();
-        setControllerInstance();
+        reader.initRequestMap();
+        setInstance();
     }
 
     protected void registerBeans() throws Exception {
@@ -29,11 +31,13 @@ public class WebApplicationContext extends AbstractApplicationContext {
         beanFactory.addBeanDefinition(beanDefinitionReader.getRegisterBeans());
     }
 
-    private void setControllerInstance() throws Exception {
-        Map<String,ControllerInfo> controllers=reader.getApis();
-        for(String key:controllers.keySet()){
-            Object instance=this.getBean(key);
-            controllers.get(key).setObject(instance);
+    private void setInstance() throws Exception {
+        Map<String, ControllerInfo> controllers = reader.getRequestMapper().getApis();
+        for (String key : controllers.keySet()) {
+            controllers.get(key).setObject(this.getBean(key));
+        }
+        for (InterceptorInfo interceptor : reader.getRequestMapper().getInterceptorList()) {
+            interceptor.setObj(this.getBean(interceptor.getName()));
         }
     }
 }

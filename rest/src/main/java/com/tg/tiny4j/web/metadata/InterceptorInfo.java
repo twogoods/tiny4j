@@ -3,20 +3,12 @@ package com.tg.tiny4j.web.metadata;
 /**
  * Created by twogoods on 16/11/7.
  */
-public class InterceptorInfo {
+public class InterceptorInfo extends BaseInfo{
     private Object obj;
-    private String name;
     private String[] pathPatterns;
     private String[] excludePathPatterns;
     int order;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String[] getPathPatterns() {
         return pathPatterns;
@@ -49,4 +41,5 @@ public class InterceptorInfo {
     public void setObj(Object obj) {
         this.obj = obj;
     }
+
 }
