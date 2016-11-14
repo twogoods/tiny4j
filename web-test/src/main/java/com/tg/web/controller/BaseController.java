@@ -10,11 +10,17 @@ import com.tg.web.model.User;
 @Api("/base")
 public class BaseController {
 
-    @RequestMapping(mapUrl = "/test",method = HttpMethod.GET)
+    @RequestMapping(mapUrl = "/test/{id}/haha",method = HttpMethod.GET)
     @ExceptionHandler(Exception.class)
     @CROS
     @InterceptorExclude(interceptors={"aInterceptor"})
     public String test(@PathVariable("id")String id,@RequestBody User user){
+        return "";
+    }
+
+
+    @RequestMapping(mapUrl = "/test",method = HttpMethod.GET)
+    public String test1(){
         return "";
     }
 

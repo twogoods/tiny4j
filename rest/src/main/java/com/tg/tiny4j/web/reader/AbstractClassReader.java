@@ -70,6 +70,9 @@ public abstract class AbstractClassReader implements Reader {
                 for (Annotation annotation : annotations) {
                     if (annotation.annotationType() == RequestMapping.class) {
                         String url = ((RequestMapping) annotation).mapUrl();
+                        //TODO 考虑占位符
+
+
                         requestUrl = urlJoin(baseUrl, url);
                         requestHandleInfo.setRequestUrl(requestUrl);
                         requestHandleInfo.setRequestmethod(((RequestMapping) annotation).method());
