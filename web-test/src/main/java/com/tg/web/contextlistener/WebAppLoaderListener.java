@@ -15,13 +15,14 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by twogoods on 16/11/2.
  */
 public class WebAppLoaderListener extends AbstractWebContextListener {
-    private static Logger log = LogManager.getLogger(WebAppLoaderListener.class);
+    private static final Logger log = LogManager.getLogger(WebAppLoaderListener.class);
 
     final WebAppControllerReader webAppControllerReader = new WebAppControllerReader();
 
@@ -38,16 +39,9 @@ public class WebAppLoaderListener extends AbstractWebContextListener {
     }
 
     @Override
-    public void requestMapInitialized(ServletContextEvent servletContextEvent, ApplicationContext applicationContext) throws Exception {
+    public void requestMapInitialized(ServletContextEvent servletContextEvent, WebApplicationContext applicationContext) throws Exception {
         webAppControllerReader.initRequestMap();
-        Map<String, ControllerInfo> controllerInfoMap = webAppControllerReader.getRequestMapper().getApis();
-        for (String key : controllerInfoMap.keySet()) {
-            ControllerInfo controller = controllerInfoMap.get(key);
-            controller.setObject(applicationContext.getBean(controller.getName()));
-        }
-        for (InterceptorInfo interceptor : webAppControllerReader.getRequestMapper().getInterceptorList()) {
-            interceptor.setObj(applicationContext.getBean(interceptor.getName()));
-        }
+        webAppControllerReader.setInstances(applicationContext.getBean(webAppControllerReader.getControllerName()));
         servletContextEvent.getServletContext().setAttribute("webrequestmapper", webAppControllerReader.getRequestMapper());
     }
 }

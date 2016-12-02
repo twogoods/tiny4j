@@ -1,6 +1,6 @@
 package com.tg.tiny4j.core.aop;
 
-import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.core.aop.advice.AopInterceptor;
 import com.tg.tiny4j.core.aop.advice.Methodinvocation;
 import java.lang.reflect.Field;
@@ -30,6 +30,6 @@ public class TestAopInterceptor implements AopInterceptor {
     }
 
     private String getFieldNameBySetter(String setterName){
-        return StringUtils.firstCharLowercase(setterName.substring(3));
+        return StringUtil.firstCharLowercase(setterName.substring(3));
     }
 }

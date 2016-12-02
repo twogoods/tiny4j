@@ -1,6 +1,6 @@
 package com.tg.tiny4j.web.reader;
 
-import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.web.annotation.*;
 import com.tg.tiny4j.web.metadata.*;
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +23,6 @@ public abstract class AbstractClassReader implements Reader {
         /**url,controller对象,方法,请求方法,拦截器信息
          * url对应一个请求方法<methodname,objname(controller名),requestmethod(请求方法),是否CROS,拦截器信息>
          * 在一个map,存controller对象,或者ioc里拿
-         *
          * 拦截器的先后执行顺序
          */
 
@@ -37,19 +36,19 @@ public abstract class AbstractClassReader implements Reader {
             controllerInfo.setClassName(clazz.getName());
             controllerInfo.setClazz(clazz);
             requestMapper.addApis(beanName, controllerInfo);
-            prasemethods(clazz.getMethods(), apiBaseUrl, clazz.getName(),beanName);
+            prasemethods(clazz.getMethods(), apiBaseUrl, clazz.getName(), beanName);
             return controllerInfo;
         } else if (clazz.isAnnotationPresent(Interceptor.class)) {
             Interceptor interceptor = (Interceptor) clazz.getAnnotation(Interceptor.class);
             InterceptorInfo interceptorInfo = new InterceptorInfo();
-            String beanName=getBeanName(interceptor.name(), clazz);
+            String beanName = getBeanName(interceptor.name(), clazz);
             interceptorInfo.setName(beanName);
             interceptorInfo.setClassName(clazz.getName());
             interceptorInfo.setClazz(clazz);
             interceptorInfo.setPathPatterns(interceptor.pathPatterns());
             interceptorInfo.setExcludePathPatterns(interceptor.excludePathPatterns());
             interceptorInfo.setOrder(interceptor.order());
-            requestMapper.addInterceptors(beanName,interceptorInfo);
+            requestMapper.addInterceptors(beanName, interceptorInfo);
             requestMapper.addInterceptorList(interceptorInfo);
             return interceptorInfo;
         }
@@ -57,7 +56,7 @@ public abstract class AbstractClassReader implements Reader {
     }
 
 
-    private void prasemethods(Method[] methods, String baseUrl, String className,String beanName) throws Exception {
+    private void prasemethods(Method[] methods, String baseUrl, String className, String beanName) throws Exception {
         for (Method method : methods) {
             // 必须要有RequestMapping 才能响应请求
             if (method.isAnnotationPresent(RequestMapping.class)) {
@@ -65,12 +64,13 @@ public abstract class AbstractClassReader implements Reader {
                 RequestHandleInfo requestHandleInfo = new RequestHandleInfo();
                 requestHandleInfo.setMethodName(method.getName());
                 requestHandleInfo.setMethod(method);
+                requestHandleInfo.setBeanName(beanName);
                 requestHandleInfo.setClassName(className);
                 String requestUrl = baseUrl;
                 for (Annotation annotation : annotations) {
                     if (annotation.annotationType() == RequestMapping.class) {
                         String url = ((RequestMapping) annotation).mapUrl();
-                        //TODO 考虑占位符
+                        //TODO 考虑占位符,正则表达式
 
 
                         requestUrl = urlJoin(baseUrl, url);
@@ -87,7 +87,7 @@ public abstract class AbstractClassReader implements Reader {
                 requestMapper.addRequestHandleMap(requestUrl, requestHandleInfo);
             } else if (method.isAnnotationPresent(ExceptionHandler.class)) {
                 ExceptionHandler exceptionHandler = method.getAnnotation(ExceptionHandler.class);
-                requestMapper.addExceptionHandle(className, new ExceptionHandleInfo(exceptionHandler.value().getName(), method.getName()));
+                requestMapper.addExceptionHandle(className, new ExceptionHandleInfo(beanName, exceptionHandler.value().getName(), method));
             }
         }
     }
@@ -105,32 +105,34 @@ public abstract class AbstractClassReader implements Reader {
             //先检查  excludeInterceptors  再includeInterceptors
             for (InterceptorInfo interceptor : requestMapper.getInterceptorList()) {
                 //优先检查响应方法自己注解上的拦截器信息
-                if(info.getExcludeInterceptors().contains(interceptor.getName())){
+                if (info.getExcludeInterceptors().contains(interceptor.getName())) {
                     continue;
                 }
-                if(info.getIncludeInterceptors().contains(interceptor.getName())){
+                if (info.getIncludeInterceptors().contains(interceptor.getName())) {
                     info.addDoInterceptors(interceptor.getName());
                     continue;
                 }
-
+                boolean matched = false;
                 //匹配url
                 String[] excludes = interceptor.getExcludePathPatterns();
                 for (String exclude : excludes) {
-                    //TODO url的匹配
-                    if (requestUrl.startsWith(exclude)){
-                        continue;
+                    //TODO url的匹配,模糊匹配还是精确匹配
+                    if (requestUrl.startsWith(exclude)) {
+                        matched = true;
+                        break;
                     }
                 }
+                if (matched) continue;
 
-                String[] includes=interceptor.getPathPatterns();
-                for (String include: includes) {
-                    if (requestUrl.startsWith(include)){
+                String[] includes = interceptor.getPathPatterns();
+                for (String include : includes) {
+                    if (requestUrl.startsWith(include)) {
                         info.addDoInterceptors(interceptor.getName());
+                        break;
                     }
                 }
             }
         }
-        System.out.println(requestMapper);
     }
 
 
@@ -148,24 +150,29 @@ public abstract class AbstractClassReader implements Reader {
     }
 
     private String urlJoin(String frontUrl, String afterUrl) {
+        String requestUrl;
         if (frontUrl.endsWith("/")) {
             if (afterUrl.startsWith("/")) {
-                return frontUrl + afterUrl.substring(1);
+                requestUrl = frontUrl + afterUrl.substring(1);
             } else {
-                return frontUrl + afterUrl;
+                requestUrl = frontUrl + afterUrl;
             }
         } else {
             if (afterUrl.startsWith("/")) {
-                return frontUrl + afterUrl;
+                requestUrl = frontUrl + afterUrl;
             } else {
-                return frontUrl + "/" + afterUrl;
+                requestUrl = frontUrl + "/" + afterUrl;
             }
         }
+        if(requestUrl.endsWith("/")){
+            requestUrl=requestUrl.substring(0,requestUrl.length()-1);
+        }
+        return requestUrl;
     }
 
     protected String getBeanName(String annotName, Class clazz) {
-        if (StringUtils.isEmpty(annotName)) {
-            return StringUtils.firstCharLowercase(clazz.getSimpleName());
+        if (StringUtil.isEmpty(annotName)) {
+            return StringUtil.firstCharLowercase(clazz.getSimpleName());
         }
         return annotName;
     }

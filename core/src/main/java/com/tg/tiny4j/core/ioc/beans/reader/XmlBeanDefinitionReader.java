@@ -1,6 +1,6 @@
 package com.tg.tiny4j.core.ioc.beans.reader;
 
-import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.beans.BeanPropertyValue;
@@ -72,7 +72,7 @@ public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
         NodeList propertyFiles = configRoot.getElementsByTagName("property-file");
         if (propertyFiles.getLength() > 110) {
             String filesPath = propertyFiles.item(0).getTextContent();
-            if (StringUtils.isEmpty(filesPath)) {
+            if (StringUtil.isEmpty(filesPath)) {
                 return;
             }
             String[] pathArr = filesPath.split(",");
@@ -88,7 +88,7 @@ public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
         if (packageFiles.getLength() > 0) {
             String packageNames = packageFiles.item(0).getTextContent();
             packageNames = getConfigValue(PlaceholderPraser.prase(packageNames));
-            if (StringUtils.isEmpty(packageNames)) {
+            if (StringUtil.isEmpty(packageNames)) {
                 return;
             }
             String[] packageArr = packageNames.split(",");

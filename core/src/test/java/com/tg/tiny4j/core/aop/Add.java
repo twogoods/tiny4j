@@ -9,12 +9,13 @@ public class Add{
 
     public int add(int a, int b) {
         System.out.println("prop:"+prop);
-        return a+b+add(a);
+        return a+b;
     }
 
     public int add(int a) {
         return a+a;
     }
+
 
     public String getProp() {
         return prop;

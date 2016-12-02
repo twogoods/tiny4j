@@ -4,9 +4,9 @@ package com.tg.tiny4j.web.metadata;
  * Created by twogoods on 16/11/9.
  */
 public class BaseInfo {
-    private String name;
-    private String className;
-    private Class clazz;
+    protected String name;
+    protected String className;
+    protected Class clazz;
 
     public String getName() {
         return name;

@@ -1,20 +1,23 @@
 package com.tg.tiny4j.web.metadata;
 
-import java.util.Objects;
+
+import java.lang.reflect.Method;
 
 /**
  * Created by twogoods on 16/11/8.
  */
 public class ExceptionHandleInfo {
+    private String beanName;
     private String exceptionName;
-    private String methodName;
+    private Method method;
 
     public ExceptionHandleInfo() {
     }
 
-    public ExceptionHandleInfo(String exceptionName, String methodName) {
+    public ExceptionHandleInfo(String beanName, String exceptionName, Method method) {
+        this.beanName = beanName;
         this.exceptionName = exceptionName;
-        this.methodName = methodName;
+        this.method = method;
     }
 
     public String getExceptionName() {
@@ -25,24 +28,19 @@ public class ExceptionHandleInfo {
         this.exceptionName = exceptionName;
     }
 
-    public String getMethodName() {
-        return methodName;
+    public Method getMethod() {
+        return method;
     }
 
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
+    public void setMethod(Method method) {
+        this.method = method;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ExceptionHandleInfo that = (ExceptionHandleInfo) o;
-        return Objects.equals(exceptionName, that.exceptionName);
+    public String getBeanName() {
+        return beanName;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(exceptionName);
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
     }
 }

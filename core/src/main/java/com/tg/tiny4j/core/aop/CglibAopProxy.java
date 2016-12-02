@@ -3,15 +3,10 @@ package com.tg.tiny4j.core.aop;
 import com.tg.tiny4j.core.aop.advice.AopAdvice;
 import com.tg.tiny4j.core.aop.advice.CglibMethodinvocation;
 import com.tg.tiny4j.core.aop.exception.AdviceDefinitionException;
-import com.tg.tiny4j.core.ioc.utils.StringUtils;
-import net.sf.cglib.core.Signature;
 import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.InterfaceMaker;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
-import org.objectweb.asm.Type;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**

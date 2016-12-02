@@ -15,7 +15,7 @@ public class SingleRestLoaderListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         String packages = servletContextEvent.getServletContext().getInitParameter("component-scan").toString();
-        log.debug("auto package {}", packages);
+        log.debug("auto package: {}", packages);
         WebScanedClassReader webScanedClassReader = new WebScanedClassReader();
         webScanedClassReader.loadClass(packages);
         try {

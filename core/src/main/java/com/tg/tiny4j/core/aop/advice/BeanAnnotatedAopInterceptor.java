@@ -1,6 +1,6 @@
 package com.tg.tiny4j.core.aop.advice;
 
-import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.beans.factory.BeanFactory;
@@ -37,7 +37,6 @@ public class BeanAnnotatedAopInterceptor implements AopInterceptor {
 
     @Override
     public Object invoke(Methodinvocation invocation) throws Throwable {
-
         String methodName = invocation.getMethod().getName();
         if (invocation instanceof AutoSetterCglibMethodinvocation) {
             Map<String, String> autoSetter = ((AutoSetterCglibMethodinvocation) invocation).getAutoSetter();
@@ -58,14 +57,13 @@ public class BeanAnnotatedAopInterceptor implements AopInterceptor {
                 Object obj = invocation.proceed();
                 beans.get(methodsMap.get(methodName)).setBean(obj);
                 return obj;
-            } else {
-                return bean;
             }
+            return bean;
         }
         return invocation.proceed();
     }
 
     private String getFieldNameBySetter(String setterName) {
-        return StringUtils.firstCharLowercase(setterName.substring(3));
+        return StringUtil.firstCharLowercase(setterName.substring(3));
     }
 }

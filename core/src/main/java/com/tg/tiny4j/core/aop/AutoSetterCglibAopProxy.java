@@ -1,6 +1,6 @@
 package com.tg.tiny4j.core.aop;
 
-import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.core.aop.advice.AopAdvice;
 import com.tg.tiny4j.core.aop.advice.AutoSetterCglibMethodinvocation;
 import com.tg.tiny4j.core.aop.exception.AdviceDefinitionException;
@@ -39,7 +39,7 @@ public class AutoSetterCglibAopProxy extends CglibAopProxy{
         Field[] fields = objCla.getDeclaredFields();
         InterfaceMaker im = new InterfaceMaker();
         for (Field f : fields) {
-            String setterName = "set" + StringUtils.firstCharUpperCase(f.getName());
+            String setterName = "set" + StringUtil.firstCharUpperCase(f.getName());
             try {
                 objCla.getDeclaredMethod(setterName,f.getType());
             } catch (NoSuchMethodException e) {

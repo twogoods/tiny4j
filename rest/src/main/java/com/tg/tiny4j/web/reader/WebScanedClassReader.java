@@ -20,7 +20,7 @@ public class WebScanedClassReader extends AbstractClassReader {
                 ClassScanner.getClasses(ClassScanner.getPathByPackage(p), classSet);
             }
 
-            log.info("get class:{}",classSet);
+            log.debug("get class:{}",classSet);
             for (Class clazz : classSet) {
                 read(clazz);
             }

@@ -1,6 +1,6 @@
 package com.tg.tiny4j.core.ioc.beans.factory;
 
-import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.core.aop.AopProxy;
 import com.tg.tiny4j.core.aop.AutoSetterCglibAopProxy;
@@ -75,18 +75,16 @@ public abstract class AbstractBeanFactory implements BeanFactory {
                 log.warn(e.getMessage());
             }
         }
-
-
         Map<String, String> annotatedMethods = beanAnnotatedDefinition.getMethodInfos();
         log.debug("bean have @Bean method:{}",annotatedMethods);
         for (String methodName : annotatedMethods.keySet()) {
-            Object bean = proxyClass.getDeclaredMethod(methodName).invoke(proxyObj);
+            proxyClass.getDeclaredMethod(methodName).invoke(proxyObj);
         }
         return proxyObj;
     }
 
     private String getSetterName(String fieldName) {
-        return "set" + StringUtils.firstCharUpperCase(fieldName);
+        return "set" + StringUtil.firstCharUpperCase(fieldName);
     }
 
     @Override
@@ -155,7 +153,7 @@ public abstract class AbstractBeanFactory implements BeanFactory {
                 declaredField.set(bean, value);
             } catch (NoSuchFieldException e) {
                 Method declaredMethod = bean.getClass().getDeclaredMethod(
-                        "set" + StringUtils.firstCharUpperCase(propertyValue.getName()), value.getClass());
+                        "set" + StringUtil.firstCharUpperCase(propertyValue.getName()), value.getClass());
                 declaredMethod.setAccessible(true);
             }
         }

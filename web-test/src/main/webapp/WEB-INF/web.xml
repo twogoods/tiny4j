@@ -12,8 +12,8 @@
 
     <listener>
         <!--<listener-class>com.tg.tiny4j.integration.context.listener.WebAppLoaderListener</listener-class>-->
-        <listener-class>com.tg.web.contextlistener.WebAppLoaderListener</listener-class>
-        <!--<listener-class>com.tg.tiny4j.web.contextlistener.SingleRestLoaderListener</listener-class>-->
+        <!--<listener-class>com.tg.web.contextlistener.WebAppLoaderListener</listener-class>-->
+        <listener-class>com.tg.tiny4j.web.contextlistener.SingleRestLoaderListener</listener-class>
     </listener>
 
     <servlet>
@@ -23,7 +23,7 @@
 
     <servlet-mapping>
         <servlet-name>dispatcherServlet</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/</url-pattern>
     </servlet-mapping>
 
 </web-app>

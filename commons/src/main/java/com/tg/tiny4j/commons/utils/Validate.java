@@ -26,4 +26,10 @@ public class Validate {
         }
         return false;
     }
+    public static boolean isEmpty(Object[] strArr){
+        if(strArr==null||strArr.length==0){
+            return true;
+        }
+        return false;
+    }
 }

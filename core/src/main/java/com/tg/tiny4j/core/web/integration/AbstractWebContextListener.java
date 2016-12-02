@@ -1,6 +1,5 @@
 package com.tg.tiny4j.core.web.integration;
 
-import com.tg.tiny4j.core.ioc.context.ApplicationContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,7 +17,7 @@ public abstract class AbstractWebContextListener implements ServletContextListen
 
     public abstract void registerHandle(HandleRegistry registry);
 
-    public abstract void requestMapInitialized(ServletContextEvent servletContextEvent,ApplicationContext applicationContext) throws Exception;
+    public abstract void requestMapInitialized(ServletContextEvent servletContextEvent,WebApplicationContext applicationContext) throws Exception;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {

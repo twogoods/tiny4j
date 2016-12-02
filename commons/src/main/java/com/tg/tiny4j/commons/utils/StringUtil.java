@@ -3,7 +3,7 @@ package com.tg.tiny4j.commons.utils;
 /**
  * Created by twogoods on 16/10/26.
  */
-public class StringUtils {
+public class StringUtil {
 
     private static int charRange = 'a' - 'A';
 

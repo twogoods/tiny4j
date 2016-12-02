@@ -1,6 +1,5 @@
 package com.tg.tiny4j.web.metadata;
 
-import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.web.exception.ExceptionHandleException;
 import com.tg.tiny4j.web.exception.InterceptorDuplicatedException;
 
@@ -19,7 +18,7 @@ public class RequestMapper {
     //处理请求的信息
     private Map<String, RequestHandleInfo> requestHandleMap = new HashMap<>();
     //异常信息
-    private Map<String, Set<ExceptionHandleInfo>> exceptionHandles = new HashMap<>();
+    private Map<String, Map<String, ExceptionHandleInfo>> exceptionHandles = new HashMap<>();
 
     public void sortInterceptorList() {
         Collections.sort(interceptorList, new Comparator<InterceptorInfo>() {
@@ -43,13 +42,13 @@ public class RequestMapper {
     }
 
     public void addExceptionHandle(String className, ExceptionHandleInfo exceptionHandleInfo) throws ExceptionHandleException {
-        Set<ExceptionHandleInfo> set = exceptionHandles.get(className);
-        if (Validate.isEmpty(set)) {
-            set = new HashSet<>();
-            set.add(exceptionHandleInfo);
-            exceptionHandles.put(className, set);
+        Map<String, ExceptionHandleInfo> map = exceptionHandles.get(className);
+        if (map == null) {
+            map = new HashMap<>();
+            map.put(exceptionHandleInfo.getExceptionName(), exceptionHandleInfo);
+            exceptionHandles.put(className, map);
         } else {
-            if (!set.add(exceptionHandleInfo)) {
+            if (map.putIfAbsent(exceptionHandleInfo.getExceptionName(), exceptionHandleInfo) != null) {
                 throw new ExceptionHandleException(String.format("%s duplicated exceptionhandle for '%s'", className, exceptionHandleInfo.getExceptionName()));
             }
         }
@@ -60,8 +59,8 @@ public class RequestMapper {
     }
 
     public void addInterceptors(String name, InterceptorInfo interceptor) throws InterceptorDuplicatedException {
-        if(this.interceptors.put(name,interceptor)!=null){
-            throw new InterceptorDuplicatedException(String.format("name '%s' is Duplicated, check interceptor '%s'",name,interceptor.getClassName()));
+        if (this.interceptors.put(name, interceptor) != null) {
+            throw new InterceptorDuplicatedException(String.format("name '%s' is Duplicated, check interceptor '%s'", name, interceptor.getClassName()));
         }
     }
 
@@ -77,7 +76,7 @@ public class RequestMapper {
         return requestHandleMap;
     }
 
-    public Map<String, Set<ExceptionHandleInfo>> getExceptionHandles() {
+    public Map<String, Map<String, ExceptionHandleInfo>> getExceptionHandles() {
         return exceptionHandles;
     }
 

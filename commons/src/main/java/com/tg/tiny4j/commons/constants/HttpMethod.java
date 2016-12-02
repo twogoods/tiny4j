@@ -1,6 +1,6 @@
 package com.tg.tiny4j.commons.constants;
 
-import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.StringUtil;
 
 /**
  * Created by twogoods on 16/11/7.
@@ -19,7 +19,7 @@ public class HttpMethod {
 
 
     public static boolean support(String httpMethod) {
-        if(StringUtils.isEmpty(httpMethod)){
+        if(StringUtil.isEmpty(httpMethod)){
             return true;
         }
         return GET.equals(httpMethod) || POST.equals(httpMethod) || PUT.equals(httpMethod)

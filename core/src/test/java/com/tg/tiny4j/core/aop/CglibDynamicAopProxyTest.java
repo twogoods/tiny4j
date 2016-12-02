@@ -20,16 +20,17 @@ public class CglibDynamicAopProxyTest {
         aopAdvice.setTarget(new Target(Add.class));
         aopAdvice.setInterceptor(new TestAopInterceptor());
         AutoSetterCglibAopProxy cglibDynamicAopProxy=new AutoSetterCglibAopProxy(aopAdvice);
+        //CglibAopProxy cglibDynamicAopProxy=new CglibAopProxy(aopAdvice);
         Add operate=(Add) cglibDynamicAopProxy.getProxy();
         System.out.println(operate.add(1, 2));
 
-        System.out.println("*******");
-        Method[] methods=operate.getClass().getMethods();
-        for(Method m:methods){
-            System.out.println(m);
-        }
-        System.out.println("*******");
 
+        //System.out.println(operate.getClass().getField("prop"));
+//        Method[] methods=operate.getClass().getMethods();
+//        for(Method m:methods){
+//            System.out.println(m);
+//        }
+        System.out.println("*******");
 
         Method setM=operate.getClass().getMethod("setProp", String.class);
         System.out.println(setM);

@@ -1,6 +1,6 @@
 package com.tg.tiny4j.web.reader;
 
-import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,9 +24,9 @@ public class ClassScanner {
      * @return
      */
     public static String getBasePath() {
-        if (StringUtils.isEmpty(basePath)) {
+        if (StringUtil.isEmpty(basePath)) {
             synchronized (ClassScanner.class) {
-                if (StringUtils.isEmpty(basePath)) {
+                if (StringUtil.isEmpty(basePath)) {
                     String baseFilePath = Thread.currentThread().getContextClassLoader().getResource("").toString();
                     basePath = baseFilePath.replace("file:", "");
                 }

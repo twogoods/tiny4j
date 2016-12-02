@@ -1,11 +1,13 @@
 package com.tg.tiny4j.web.servlet;
 
-import com.tg.tiny4j.commons.utils.StringUtils;
+import com.tg.tiny4j.commons.utils.JsonUtil;
+import com.tg.tiny4j.commons.utils.StringUtil;
+import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.web.annotation.PathVariable;
 import com.tg.tiny4j.web.annotation.RequestBody;
-import com.tg.tiny4j.web.metadata.InterceptorInfo;
-import com.tg.tiny4j.web.metadata.RequestHandleInfo;
-import com.tg.tiny4j.web.metadata.RequestMapper;
+import com.tg.tiny4j.web.annotation.RequestParam;
+import com.tg.tiny4j.web.metadata.*;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,11 +16,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,27 +36,40 @@ public class DispatcherServlet extends HttpServlet {
 
     private Map<String, RequestHandleInfo> requestHandleMap;
 
+    private Map<String, Map<String, ExceptionHandleInfo>> exceptionHandles;
+
+    private Map<String, ControllerInfo> apis = new HashMap<>();
+
+
     @Override
     public void init() throws ServletException {
-//        ServletContext servletContext = getServletContext();
-//        String mode = servletContext.getAttribute("run_mode").toString();
         requestMapper = (RequestMapper) getServletContext().getAttribute("webrequestmapper");
         requestHandleMap = requestMapper.getRequestHandleMap();
+        exceptionHandles = requestMapper.getExceptionHandles();
+        apis = requestMapper.getApis();
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String pathInfo = req.getRequestURI();
+        String pathInfo = req.getServletPath();
+        log.info("url path: " + pathInfo);
         RequestHandleInfo requestHandleInfo = requestHandleMap.get(pathInfo);
         if (requestHandleInfo != null) {
+            if (!"".equals(requestHandleInfo.getRequestmethod()) && !req.getMethod().equals(requestHandleInfo.getRequestmethod())) {
+                resp.setStatus(405);
+                return;
+            }
             try {
                 handle(req, resp, requestHandleInfo);
             } catch (Exception e) {
-                log.error(e);
+                log.error("error: {}", e);
+                //resp.sendError(500);
+                resp.setStatus(500);
             }
             return;
         }
-        resp.sendError(404);
+        // 不考虑静态资源的问题
+        resp.setStatus(404);
     }
 
     private void handle(HttpServletRequest req, HttpServletResponse resp, RequestHandleInfo requestHandleInfo) throws Exception {
@@ -79,38 +96,101 @@ public class DispatcherServlet extends HttpServlet {
         return interceptorInfoList.size() == index;
     }
 
-    private void doRequestHandle(HttpServletRequest req, HttpServletResponse resp, RequestHandleInfo requestHandleInfo) {
+    private void doRequestHandle(HttpServletRequest req, HttpServletResponse resp, RequestHandleInfo requestHandleInfo) throws Exception {
         Method method = requestHandleInfo.getMethod();
         method.setAccessible(true);
-        Object result=null;
+        Object result = null;
         try {
-            result=method.invoke(requestHandleInfo.getInstance(), praseParam(method, req, resp));
+            if (method.getParameterCount() == 0) {
+                result = method.invoke(apis.get(requestHandleInfo.getBeanName()).getObject());
+            } else {
+                result = method.invoke(apis.get(requestHandleInfo.getBeanName()).getObject(), praseParam(method, req, resp));
+            }
         } catch (Exception e) {
-            //TODO 异常处理
+            log.error("error: {}", e);
+            ExceptionHandleInfo exceptionHandleInfo = getHandleInfo(e.getClass(), requestHandleInfo.getClassName());
+            if (exceptionHandleInfo != null) {
+                doHandleException(exceptionHandleInfo.getMethod(), apis.get(requestHandleInfo.getBeanName()).getObject(), req, resp);
+                return;
+            } else {
+                throw e;
+            }
         }
-        //TODO 处理json返回
-        Class returnType = method.getReturnType();
+        if (!Validate.isEmpty(result)) {
+            //TODO CROS
+            returnJsonStr(result, resp);
+        }
+    }
 
+    private void doHandleException(Method method, Object instance, HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        method.setAccessible(true);
+        Object result = null;
+        try {
+            if (method.getParameterCount() == 0) {
+                result = method.invoke(instance);
+            } else {
+                result = method.invoke(instance, praseParam(method, req, resp));
+            }
+        } catch (Exception e) {
+            throw e;
+        }
+        if (!Validate.isEmpty(result)) {
+            returnJsonStr(result, resp);
+        }
+    }
+
+
+    private void returnJsonStr(Object obj, HttpServletResponse resp) throws IOException {
+        JsonUtil.writeValue(resp, obj);
+    }
+
+
+    private ExceptionHandleInfo getHandleInfo(Class exceptionClass, String className) {
+        Map<String, ExceptionHandleInfo> handleMap = exceptionHandles.get(className);
+        if (handleMap == null) {
+            return null;
+        } else {
+            return getHandleInfo(handleMap, exceptionClass);
+        }
+    }
+
+
+    private ExceptionHandleInfo getHandleInfo(Map<String, ExceptionHandleInfo> handleMap, Class exceptionClass) {
+        if ("java.lang.Throwable".equals(exceptionClass.getName()) || "java.lang.Object".equals(exceptionClass.getName())) {
+            return null;
+        }
+        ExceptionHandleInfo exceptionHandleInfo = handleMap.get(exceptionClass.getName());
+        if (exceptionHandleInfo == null) {
+            return getHandleInfo(handleMap, exceptionClass.getSuperclass());
+        } else {
+            return exceptionHandleInfo;
+        }
     }
 
     private Object[] praseParam(Method method, HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Map<String, String[]> requestParams = req.getParameterMap();
-        List<Object> paramValues=new ArrayList<>();
+        List<Object> paramValues = new ArrayList<>();
+        //拿不到参数名
         Parameter[] parameters = method.getParameters();
         Class[] paramTypes = method.getParameterTypes();
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        for (int i = 0; i < parameterAnnotations.length; i++) {
-            //TODO 参数是servlet相关的api,如HttpServletRequest
 
-            if (parameterAnnotations[i].length == 0) {
-                //TODO 无注解,类型转化
-                paramValues.add(stringCast(paramTypes[i], parameters[i].getName(), requestParams));
+        for (int i = 0; i < paramTypes.length; i++) {
+            Annotation[] annotatins = parameters[i].getAnnotations();
+            if (Validate.isEmpty(annotatins)) {
+                //TODO 无注解时使用asm获取方法参数名解析
+                paramValues.add(castServletApi(paramTypes[i], req, resp));
             } else {
-                for (Annotation annotation : parameterAnnotations[i]) {
+                for (Annotation annotation : annotatins) {
                     if (annotation.annotationType() == PathVariable.class) {
-                        //占位符的匹配
+                        //TODO 占位符的匹配
+                    } else if (annotation.annotationType() == RequestParam.class) {
+                        // 解析参数,通过注解获取参数名
+                        paramValues.add(cast(paramTypes[i], ((RequestParam) annotation).value(), requestParams, req, resp));
                     } else if (annotation.annotationType() == RequestBody.class) {
                         //json解析
+                        try (InputStream in = req.getInputStream()) {
+                            paramValues.add(JsonUtil.objectFromJson(IOUtils.toString(in, "UTF-8"), paramTypes[i]));
+                        }
                     }
                 }
             }
@@ -118,33 +198,57 @@ public class DispatcherServlet extends HttpServlet {
         return paramValues.toArray();
     }
 
-    private Object stringCast(Class type, String name, Map<String, String[]> requestParams) throws Exception {
-        String[] value = requestParams.get(name);
-        if (value == null || value.length == 0) {
-            return stringCastObj(type, requestParams);
-        } else if (value.length > 1) {
-            log.warn(String.format("you have %d value in param '%s'", value.length, name));
-        }
-        return baseCast(type, value[0]);
+
+    private Object castServletApi(Class type, HttpServletRequest req, HttpServletResponse resp) {
+        if ("javax.servlet.http.HttpServletRequest".equals(type.getName())) {
+            return req;
+        } else if ("javax.servlet.http.HttpServletResponse".equals(type.getName()))
+            return resp;
+        return null;
     }
 
-    private Object stringCastObj(Class type, Map<String, String[]> requestParams) throws Exception {
-        //TODO 判断这个类是否是自定义的实体类,大多数情况下不是就可以直接不解析了? jdk的类和自定义的类的类加载器不同?
+    private Object cast(Class type, String name, Map<String, String[]> requestParams, HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        Object o = castServletApi(type, req, resp);
+        if (o != null) return o;
+        String[] value = requestParams.get(name);
+        if (o == null && !Validate.isEmpty(value)) {
+            o = baseCast(type, value[0]);
+            if (value.length > 1) {
+                log.warn(String.format("you have %d value in param '%s'", value.length, name));
+            }
+        }
+        if (o == null) {
+            o = castObj(type, requestParams);
+        }
+        if (o == null) {
+            o = baseTypeDefault(type);
+        }
+        return o;
+    }
+
+    private Object castObj(Class type, Map<String, String[]> requestParams) throws Exception {
+        //TODO 暂时,判断这个类是否是自定义的实体类,大多数情况下不是就可以直接不解析了
+        if (type.getClassLoader() == null) {
+            return null;
+        }
         Object obj = type.newInstance();
         Field[] fields = type.getDeclaredFields();
         for (Field f : fields) {
             String[] strValue = requestParams.get(f.getName());
-            if (strValue == null || strValue.length == 0) {
-                //TODO 这里只做基本类型,引用类型考虑递归 stringCastObj(f.getType(), requestParams);
+            Object v = null;
+            if (Validate.isEmpty(strValue)) {
+                castObj(f.getType(), requestParams);
             } else {
-                Object v = baseCast(f.getType(), strValue[0]);
+                v = baseCast(f.getType(), strValue[0]);
+            }
+            if (v != null) {
                 f.setAccessible(true);
                 Method m = null;
                 try {
-                    m = type.getMethod("set" + StringUtils.firstCharUpperCase(f.getName()), f.getType());
+                    m = type.getMethod("set" + StringUtil.firstCharUpperCase(f.getName()), f.getType());
                     m.invoke(obj, v);
                 } catch (NoSuchMethodException e) {
-                    log.warn(String.format("class '%s' have no set property for '%s'", type, f.getName()), e);
+                    log.warn(String.format("class '%s' has no set property for '%s'", type, f.getName()), e);
                 } catch (Exception e) {
                     try {
                         f.set(obj, v);
@@ -174,10 +278,39 @@ public class DispatcherServlet extends HttpServlet {
             return Boolean.parseBoolean(value);
         } else if (type == Byte.class || type == byte.class) {
             return Byte.parseByte(value);
-        } else if (type == Character[].class || type == char[].class) {
-            return value.toCharArray();
+        } else if (type == Character.class || type == char.class) {
+            return value.toCharArray()[0];
         }
         return null;
     }
 
+    private int intDefault;
+    private long longDefault;
+    private double doubleDefault;
+    private float floatDefault;
+    private short shortDefault;
+    private boolean boolDefault;
+    private byte byteDefault;
+    private char charDefault;
+
+    private Object baseTypeDefault(Class type) {
+        if (type == Integer.class || type == int.class) {
+            return intDefault;
+        } else if (type == Long.class || type == long.class) {
+            return longDefault;
+        } else if (type == Double.class || type == double.class) {
+            return doubleDefault;
+        } else if (type == Float.class || type == float.class) {
+            return floatDefault;
+        } else if (type == Short.class || type == short.class) {
+            return shortDefault;
+        } else if (type == Boolean.class || type == boolean.class) {
+            return boolDefault;
+        } else if (type == Byte.class || type == byte.class) {
+            return byteDefault;
+        } else if (type == Character.class || type == char.class) {
+            return charDefault;
+        }
+        return null;
+    }
 }

@@ -77,6 +77,7 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
             return;
         }
         handleFieldAnnot(clazz, beanDefinition);
+        //多一个步骤解析方法
         Map<String, String> methodinfos = handleMethodAnnotAndRegister(clazz);
         ((BeanAnnotatedDefinition) beanDefinition).putmethodInfos(methodinfos);
         registerBean(beanDefinition);
