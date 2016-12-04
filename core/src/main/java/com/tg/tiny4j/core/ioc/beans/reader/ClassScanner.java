@@ -1,6 +1,6 @@
 package com.tg.tiny4j.core.ioc.beans.reader;
 
-import com.tg.tiny4j.commons.utils.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,9 +24,9 @@ public class ClassScanner {
      * @return
      */
     public static String getBasePath() {
-        if (StringUtil.isEmpty(basePath)) {
+        if (StringUtils.isEmpty(basePath)) {
             synchronized (ClassScanner.class) {
-                if (StringUtil.isEmpty(basePath)) {
+                if (StringUtils.isEmpty(basePath)) {
                     String baseFilePath = Thread.currentThread().getContextClassLoader().getResource("").toString();
                     basePath = baseFilePath.replace("file:", "");
                 }

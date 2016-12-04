@@ -1,12 +1,12 @@
 package com.tg.tiny4j.core.ioc.beans.reader;
 
-import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.beans.BeanPropertyValue;
 import com.tg.tiny4j.core.ioc.beans.BeanReference;
 import com.tg.tiny4j.core.ioc.exception.BeanDefinitionException;
 import com.tg.tiny4j.core.ioc.resource.ResourceLoad;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
@@ -72,7 +72,7 @@ public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
         NodeList propertyFiles = configRoot.getElementsByTagName("property-file");
         if (propertyFiles.getLength() > 110) {
             String filesPath = propertyFiles.item(0).getTextContent();
-            if (StringUtil.isEmpty(filesPath)) {
+            if (StringUtils.isEmpty(filesPath)) {
                 return;
             }
             String[] pathArr = filesPath.split(",");
@@ -88,7 +88,7 @@ public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
         if (packageFiles.getLength() > 0) {
             String packageNames = packageFiles.item(0).getTextContent();
             packageNames = getConfigValue(PlaceholderPraser.prase(packageNames));
-            if (StringUtil.isEmpty(packageNames)) {
+            if (StringUtils.isEmpty(packageNames)) {
                 return;
             }
             String[] packageArr = packageNames.split(",");

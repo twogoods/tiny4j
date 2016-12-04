@@ -2,6 +2,7 @@ package com.tg.tiny4j.web.metadata;
 
 import com.tg.tiny4j.web.exception.ExceptionHandleException;
 import com.tg.tiny4j.web.exception.InterceptorDuplicatedException;
+import com.tg.tiny4j.web.exception.UrlDuplicatedException;
 
 import java.util.*;
 
@@ -17,6 +18,9 @@ public class RequestMapper {
     private List<InterceptorInfo> interceptorList = new ArrayList<>();
     //处理请求的信息
     private Map<String, RequestHandleInfo> requestHandleMap = new HashMap<>();
+
+    private List<String> urlPraseResult = new ArrayList<>();
+
     //异常信息
     private Map<String, Map<String, ExceptionHandleInfo>> exceptionHandles = new HashMap<>();
 
@@ -37,8 +41,10 @@ public class RequestMapper {
         this.interceptorList.add(interceptorInfo);
     }
 
-    public void addRequestHandleMap(String name, RequestHandleInfo requestHandleInfo) {
-        this.requestHandleMap.put(name, requestHandleInfo);
+    public void addRequestHandleMap(String url, RequestHandleInfo requestHandleInfo) throws UrlDuplicatedException {
+        if (this.requestHandleMap.putIfAbsent(url, requestHandleInfo) != null) {
+            throw new UrlDuplicatedException(String.format("check duplicated url : '%s'", url.replace("\\w*", "**")));
+        }
     }
 
     public void addExceptionHandle(String className, ExceptionHandleInfo exceptionHandleInfo) throws ExceptionHandleException {
@@ -78,6 +84,19 @@ public class RequestMapper {
 
     public Map<String, Map<String, ExceptionHandleInfo>> getExceptionHandles() {
         return exceptionHandles;
+    }
+
+    public List<String> getUrlPraseResult() {
+        return urlPraseResult;
+    }
+
+    public void addUrlPraseResult(String prasedUrl) throws UrlDuplicatedException {
+        for (String s : urlPraseResult) {
+            if (s.equals(prasedUrl)) {
+                throw new UrlDuplicatedException(String.format("url duplicated ! two url: '%s' , '%s'", prasedUrl.replace("\\w*", "**"), s.replace("\\w*", "**")));
+            }
+        }
+        urlPraseResult.add(prasedUrl);
     }
 
     @Override

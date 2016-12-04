@@ -1,14 +1,21 @@
 package com.tg.tiny4j.web.reader;
 
-import com.tg.tiny4j.commons.utils.StringUtil;
+import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.web.annotation.*;
+import com.tg.tiny4j.web.exception.UrlDuplicatedException;
 import com.tg.tiny4j.web.metadata.*;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by twogoods on 16/11/2.
@@ -25,10 +32,9 @@ public abstract class AbstractClassReader implements Reader {
          * 在一个map,存controller对象,或者ioc里拿
          * 拦截器的先后执行顺序
          */
-
         if (clazz.isAnnotationPresent(Api.class)) {
             Api api = (Api) clazz.getAnnotation(Api.class);
-            //TODO 配置的全局的contextPath
+            //TODO 可以增加一个可配置的全局的contextPath
             String apiBaseUrl = api.value();
             ControllerInfo controllerInfo = new ControllerInfo();
             String beanName = getBeanName(api.name(), clazz);
@@ -70,18 +76,30 @@ public abstract class AbstractClassReader implements Reader {
                 for (Annotation annotation : annotations) {
                     if (annotation.annotationType() == RequestMapping.class) {
                         String url = ((RequestMapping) annotation).mapUrl();
-                        //TODO 考虑占位符,正则表达式
-
-
                         requestUrl = urlJoin(baseUrl, url);
+                        // TODO url查重
+                        UrlPraseInfo urlPraseInfo = praseConfigPathPattern(requestUrl);
+                        if (!Validate.isEmpty(urlPraseInfo)) {
+                            requestUrl = urlPraseInfo.getMatch();
+                            checkUrlDeplicated(requestUrl);
+                            requestHandleInfo.setUrlPraseInfo(urlPraseInfo);
+                            requestMapper.addUrlPraseResult(urlPraseInfo.getMatch());
+                        } else {
+                            checkUrlDeplicated(requestUrl);
+                        }
                         requestHandleInfo.setRequestUrl(requestUrl);
                         requestHandleInfo.setRequestmethod(((RequestMapping) annotation).method());
                     } else if (annotation.annotationType() == CROS.class) {
-                        requestHandleInfo.setCros(true);
+                        CROS cros = ((CROS) annotation);
+                        CrosInfo crosInfo = new CrosInfo(cros.origins(), cros.methods(), cros.maxAge(), cros.headers(), cros.cookie());
+                        requestHandleInfo.setCros(crosInfo);
                     } else if (annotation.annotationType() == InterceptorExclude.class) {
                         requestHandleInfo.setExcludeInterceptors(((InterceptorExclude) annotation).interceptors());
                     } else if (annotation.annotationType() == InterceptorInclude.class) {
                         requestHandleInfo.setIncludeInterceptors(((InterceptorInclude) annotation).interceptors());
+                    } else if (annotation.annotationType() == InterceptorSelect.class) {
+                        requestHandleInfo.setIncludeInterceptors(((InterceptorSelect) annotation).include());
+                        requestHandleInfo.setExcludeInterceptors(((InterceptorSelect) annotation).exclude());
                     }
                 }
                 requestMapper.addRequestHandleMap(requestUrl, requestHandleInfo);
@@ -116,7 +134,7 @@ public abstract class AbstractClassReader implements Reader {
                 //匹配url
                 String[] excludes = interceptor.getExcludePathPatterns();
                 for (String exclude : excludes) {
-                    //TODO url的匹配,模糊匹配还是精确匹配
+                    //TODO restful url的匹配
                     if (requestUrl.startsWith(exclude)) {
                         matched = true;
                         break;
@@ -164,17 +182,52 @@ public abstract class AbstractClassReader implements Reader {
                 requestUrl = frontUrl + "/" + afterUrl;
             }
         }
-        if(requestUrl.endsWith("/")){
-            requestUrl=requestUrl.substring(0,requestUrl.length()-1);
+
+        if (!requestUrl.startsWith("/")) {
+            requestUrl = "/" + requestUrl;
+        }
+        if (requestUrl.endsWith("/")) {
+            requestUrl = requestUrl.substring(0, requestUrl.length() - 1);
         }
         return requestUrl;
     }
 
     protected String getBeanName(String annotName, Class clazz) {
-        if (StringUtil.isEmpty(annotName)) {
-            return StringUtil.firstCharLowercase(clazz.getSimpleName());
+        if (StringUtils.isEmpty(annotName)) {
+            return WordUtils.uncapitalize(clazz.getSimpleName());
         }
         return annotName;
+    }
+
+
+    private String patternStr = "\\{\\w*\\}*";
+    private Pattern pattern = Pattern.compile(patternStr);
+
+    private UrlPraseInfo praseConfigPathPattern(String url) {
+        Matcher m = pattern.matcher(url);
+        List<String> params = new ArrayList();
+        while (m.find()) {
+            String r = m.group();
+            params.add(r.substring(1, r.length() - 1));
+        }
+        if (params.size() == 0) {
+            return null;
+        }
+        String matchStr = m.replaceAll("\\\\w*");
+        return new UrlPraseInfo(matchStr, params);
+    }
+
+    private void checkUrlDeplicated(String requestUrl) throws UrlDuplicatedException {
+        for (String matchStr : requestMapper.getUrlPraseResult()) {
+            if (matchStr.equals(requestUrl)) {
+                throw new UrlDuplicatedException(String.format("url duplicated ! two url: '%s' , '%s'", matchStr.replace("\\w*", "**"), requestUrl.replace("\\w*", "**")));
+            }
+            Pattern pattern = Pattern.compile(matchStr);
+            Matcher m = pattern.matcher(requestUrl);
+            if (m.matches()) {
+                throw new UrlDuplicatedException(String.format("url duplicated ! two url: '%s' , '%s'", matchStr.replace("\\w*", "**"), requestUrl.replace("\\w*", "**")));
+            }
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.tg.tiny4j.core.aop;
 
+import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.core.aop.advice.AopAdvice;
 import com.tg.tiny4j.core.aop.advice.Methodinvocation;
 import com.tg.tiny4j.core.aop.exception.AdviceDefinitionException;
@@ -27,7 +28,7 @@ public class JdkDynamicAopProxy extends AbstractAopProxy implements InvocationHa
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (aopAdvice.getInterceptor() == null) {
             return method.invoke(aopAdvice.getTarget().getTargetObj(), args);
-        }else{
+        } else {
             return aopAdvice.getInterceptor().invoke(new Methodinvocation(aopAdvice.getTarget().getTargetObj(), method, args));
         }
     }

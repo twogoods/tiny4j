@@ -1,9 +1,10 @@
 package com.tg.tiny4j.core.ioc.beans.reader;
 
-import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.exception.ConfigurationException;
 import com.tg.tiny4j.core.ioc.resource.ResourceLoad;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -64,21 +65,21 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
      */
     protected static String getBeanNameByClassName(String classname) {
         String[] path = classname.split("\\.");
-        return StringUtil.firstCharLowercase(path[path.length - 1]);
+        return WordUtils.uncapitalize(path[path.length - 1]);
     }
 
     /**
      * 未写注解参数,类名首字母小写
      */
     protected String getBeanName(String annotName, Class clazz) {
-        if (StringUtil.isEmpty(annotName)) {
-            return StringUtil.firstCharLowercase(clazz.getSimpleName());
+        if (StringUtils.isEmpty(annotName)) {
+            return WordUtils.uncapitalize(clazz.getSimpleName());
         }
         return annotName;
     }
     protected String getBeanName(String annotName, String defaultName) {
-        if (StringUtil.isEmpty(annotName)) {
-            return StringUtil.firstCharLowercase(defaultName);
+        if (StringUtils.isEmpty(annotName)) {
+            return WordUtils.uncapitalize(defaultName);
         }
         return annotName;
     }

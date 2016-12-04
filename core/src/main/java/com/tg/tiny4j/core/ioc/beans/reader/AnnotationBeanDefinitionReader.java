@@ -237,7 +237,6 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
                     BeanDefinition beanDefinition = new BeanDefinition(beanName, method.getReturnType());
                     methodInfos.put(method.getName(), beanName);
                     getRegisterBeans().putIfAbsent(beanDefinition.getId(), beanDefinition);
-                    //TODO 似乎不行???当前这个bean初始化后,执行这个bean方法,类似后置处理器.
                 }
             }
         }

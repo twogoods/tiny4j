@@ -1,6 +1,5 @@
 package com.tg.tiny4j.core.ioc.beans.factory;
 
-import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.core.aop.AopProxy;
 import com.tg.tiny4j.core.aop.AutoSetterCglibAopProxy;
@@ -9,6 +8,7 @@ import com.tg.tiny4j.core.aop.advice.BeanAnnotatedAopInterceptor;
 import com.tg.tiny4j.core.aop.advice.Target;
 import com.tg.tiny4j.core.ioc.beans.*;
 import com.tg.tiny4j.core.ioc.exception.BeanException;
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -84,7 +84,7 @@ public abstract class AbstractBeanFactory implements BeanFactory {
     }
 
     private String getSetterName(String fieldName) {
-        return "set" + StringUtil.firstCharUpperCase(fieldName);
+        return "set" + WordUtils.capitalize(fieldName);
     }
 
     @Override
@@ -113,7 +113,6 @@ public abstract class AbstractBeanFactory implements BeanFactory {
             bean = postProcessor.postProcessBeforeInitialization(bean, name);
         }
         //spring 的bean配置里有一个initmetod,会在这里执行,此处略过
-        //TODO 配合aop我们在后置处理器把bean替换成proxy
         for (BeanPostProcessor postProcessor : postProcessorList) {
             bean = postProcessor.postProcessAfterInitialization(bean, name);
         }
@@ -153,7 +152,7 @@ public abstract class AbstractBeanFactory implements BeanFactory {
                 declaredField.set(bean, value);
             } catch (NoSuchFieldException e) {
                 Method declaredMethod = bean.getClass().getDeclaredMethod(
-                        "set" + StringUtil.firstCharUpperCase(propertyValue.getName()), value.getClass());
+                        "set" + WordUtils.capitalize(propertyValue.getName()), value.getClass());
                 declaredMethod.setAccessible(true);
             }
         }

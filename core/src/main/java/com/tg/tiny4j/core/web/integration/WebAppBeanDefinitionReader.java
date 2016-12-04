@@ -25,7 +25,7 @@ public class WebAppBeanDefinitionReader extends XmlBeanDefinitionReader {
 
     @Override
     public BeanDefinition handleIntegrationAnnotation(Class clazz) throws Exception {
-        log.info("do prase:{}",clazz);
+        log.debug("prase class : {}",clazz);
         return handle.handle(clazz);
     }
 }

@@ -1,12 +1,12 @@
 package com.tg.tiny4j.core.aop;
 
-import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.core.aop.advice.AopAdvice;
 import com.tg.tiny4j.core.aop.advice.AutoSetterCglibMethodinvocation;
 import com.tg.tiny4j.core.aop.exception.AdviceDefinitionException;
 import net.sf.cglib.core.Signature;
 import net.sf.cglib.proxy.InterfaceMaker;
 import net.sf.cglib.proxy.MethodProxy;
+import org.apache.commons.lang3.text.WordUtils;
 import org.objectweb.asm.Type;
 
 import java.lang.reflect.Field;
@@ -39,7 +39,7 @@ public class AutoSetterCglibAopProxy extends CglibAopProxy{
         Field[] fields = objCla.getDeclaredFields();
         InterfaceMaker im = new InterfaceMaker();
         for (Field f : fields) {
-            String setterName = "set" + StringUtil.firstCharUpperCase(f.getName());
+            String setterName = "set" + WordUtils.capitalize(f.getName());
             try {
                 objCla.getDeclaredMethod(setterName,f.getType());
             } catch (NoSuchMethodException e) {

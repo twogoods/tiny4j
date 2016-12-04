@@ -1,8 +1,11 @@
 package com.tg.web.controller;
 
 import com.tg.tiny4j.commons.constants.HttpMethod;
+import com.tg.tiny4j.core.ioc.annotation.Inject;
+import com.tg.tiny4j.core.ioc.annotation.Value;
 import com.tg.tiny4j.web.annotation.*;
 import com.tg.web.model.User;
+import com.tg.web.service.UserService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,28 +16,33 @@ import java.util.Map;
 @Api("/base")
 public class TestController extends BaseController {
 
-    private String meth = "hah";
+    @Value("${user.name:test}")
+    private String name;
+
+    @Inject
+    private UserService userService;
 
     @RequestMapping
-    public String in() {
-        return "index";
+    public String index() {
+        userService.query();
+        return name;
     }
 
-    @RequestMapping(mapUrl = "/test/{id}/haha", method = HttpMethod.GET)
-    @CROS
-    public User test(@PathVariable("id") String id, @RequestBody User user) {
-        return user;
+    @RequestMapping(mapUrl = "/test/{id}", method = HttpMethod.GET)
+    @CROS(origins = "www.baidu.com", methods = {HttpMethod.GET}, maxAge = "3600")
+    public String patgTest(@PathVariable("id") String id) {
+        return id;
     }
-
 
     @RequestMapping(mapUrl = "/test", method = HttpMethod.GET)
-    @InterceptorExclude(interceptors = {"aInterceptor", "bInterceptor"})
-    public String test1() {
+    @InterceptorSelect(include = {"aInterceptor"}, exclude = {"bInterceptor"})
+    public String interceptorTest() {
         return "haha";
     }
 
+
     @RequestMapping(mapUrl = "/exception", method = HttpMethod.GET)
-    public String testExc() {
+    public String exceptionTest() {
         int i = 1 / 0;
         return "haha";
     }
@@ -42,14 +50,14 @@ public class TestController extends BaseController {
 
     @RequestMapping(mapUrl = "/index")
     @CROS
-    public String index(@RequestParam("id") long id, @RequestParam("name") String name) {
+    public String paramTest(@RequestParam("id") long id, @RequestParam("name") String name) {
         return name + "---" + id;
     }
 
 
     @RequestMapping(mapUrl = "/user")
     @InterceptorExclude(interceptors = {"bInterceptor"})
-    public Map<String, Object> model(@RequestParam("name") String name, @RequestParam User user) {
+    public Map<String, Object> modelTest(@RequestParam("name") String name, @RequestParam User user) {
         Map<String, Object> map = new HashMap<>();
         map.put("name", name);
         map.put("user", user);
@@ -58,6 +66,12 @@ public class TestController extends BaseController {
 
     @RequestMapping(mapUrl = "/json", method = HttpMethod.POST)
     public User modelJson(@RequestBody User user) {
+        return user;
+    }
+
+    @RequestMapping(mapUrl = "/user/{id}", method = HttpMethod.PUT)
+    @CROS
+    public User insert(@PathVariable("id") long id, @RequestBody User user) {
         return user;
     }
 

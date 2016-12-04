@@ -1,5 +1,6 @@
 package com.tg.tiny4j.core.web.integration;
 
+import com.tg.tiny4j.commons.constants.WebApplicationEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,11 +14,11 @@ public abstract class AbstractWebContextListener implements ServletContextListen
 
     private static Logger log = LogManager.getLogger(AbstractWebContextListener.class);
 
-    private HandleRegistry registry=new HandleRegistry();
+    private HandleRegistry registry = new HandleRegistry();
 
     public abstract void registerHandle(HandleRegistry registry);
 
-    public abstract void requestMapInitialized(ServletContextEvent servletContextEvent,WebApplicationContext applicationContext) throws Exception;
+    public abstract void requestMapInitialized(ServletContextEvent servletContextEvent, WebApplicationContext applicationContext) throws Exception;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -26,11 +27,9 @@ public abstract class AbstractWebContextListener implements ServletContextListen
         try {
             registerHandle(registry);
             webApplicationContext = new WebApplicationContext(registry.getHandle());
-
-            requestMapInitialized(servletContextEvent,webApplicationContext);
-
-            servletContextEvent.getServletContext().setAttribute("run_mode", "withcontainer");
-            servletContextEvent.getServletContext().setAttribute("root_applicationcontext", webApplicationContext);
+            requestMapInitialized(servletContextEvent, webApplicationContext);
+            servletContextEvent.getServletContext().setAttribute(WebApplicationEnvironment.RUN_MODE, WebApplicationEnvironment.CONTAINER_MODE);
+//            servletContextEvent.getServletContext().setAttribute("root_applicationcontext", webApplicationContext);
         } catch (Exception e) {
             log.error("Context initialization failed", e);
         }

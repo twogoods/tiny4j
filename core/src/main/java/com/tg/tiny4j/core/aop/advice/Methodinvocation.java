@@ -1,5 +1,6 @@
 package com.tg.tiny4j.core.aop.advice;
 
+
 import java.lang.reflect.Method;
 
 /**
@@ -26,8 +27,8 @@ public class Methodinvocation implements Invocation {
     }
 
     @Override
-    public Object proceed() throws Throwable{
-        return method.invoke(target,args);
+    public Object proceed() throws Throwable {
+        return method.invoke(target, args);
     }
 
     @Override

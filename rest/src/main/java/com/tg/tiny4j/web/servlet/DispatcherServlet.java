@@ -1,13 +1,14 @@
 package com.tg.tiny4j.web.servlet;
 
 import com.tg.tiny4j.commons.utils.JsonUtil;
-import com.tg.tiny4j.commons.utils.StringUtil;
 import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.web.annotation.PathVariable;
 import com.tg.tiny4j.web.annotation.RequestBody;
 import com.tg.tiny4j.web.annotation.RequestParam;
 import com.tg.tiny4j.web.metadata.*;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by twogoods on 16/11/7.
@@ -35,6 +38,8 @@ public class DispatcherServlet extends HttpServlet {
     private RequestMapper requestMapper;
 
     private Map<String, RequestHandleInfo> requestHandleMap;
+
+    private List<String> urlPraseResult;
 
     private Map<String, Map<String, ExceptionHandleInfo>> exceptionHandles;
 
@@ -47,19 +52,37 @@ public class DispatcherServlet extends HttpServlet {
         requestHandleMap = requestMapper.getRequestHandleMap();
         exceptionHandles = requestMapper.getExceptionHandles();
         apis = requestMapper.getApis();
+        urlPraseResult = requestMapper.getUrlPraseResult();
+    }
+
+    private String getUrl(HttpServletRequest req) {
+        String pathInfo = req.getServletPath();
+        if (pathInfo.endsWith("/")) {
+            return pathInfo.substring(0, pathInfo.length() - 1);
+        }
+        return pathInfo;
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String pathInfo = req.getServletPath();
+        String pathInfo = getUrl(req);
         log.info("url path: " + pathInfo);
-        RequestHandleInfo requestHandleInfo = requestHandleMap.get(pathInfo);
+
+        RequestHandleInfo requestHandleInfo;
+        String matchResult = matchRequestHandleUrl(pathInfo);
+        if (StringUtils.isEmpty(matchResult)) {
+            requestHandleInfo = requestHandleMap.get(pathInfo);
+        } else {
+            requestHandleInfo = requestHandleMap.get(matchResult);
+            req.setAttribute("pathParams", getPathParam(pathInfo, matchResult, requestHandleInfo.getUrlPraseInfo().getParams()));
+        }
         if (requestHandleInfo != null) {
             if (!"".equals(requestHandleInfo.getRequestmethod()) && !req.getMethod().equals(requestHandleInfo.getRequestmethod())) {
                 resp.setStatus(405);
                 return;
             }
             try {
+                cros(resp, requestHandleInfo.getCros());
                 handle(req, resp, requestHandleInfo);
             } catch (Exception e) {
                 log.error("error: {}", e);
@@ -71,6 +94,49 @@ public class DispatcherServlet extends HttpServlet {
         // 不考虑静态资源的问题
         resp.setStatus(404);
     }
+
+    private String matchRequestHandleUrl(String requestUrl) {
+        for (String matchStr : urlPraseResult) {
+            Pattern pattern = Pattern.compile(matchStr);
+            Matcher m = pattern.matcher(requestUrl);
+            if (m.matches()) {
+                return matchStr;
+            }
+        }
+        return null;
+    }
+
+    private Map<String, String> getPathParam(String requestUrl, String matchUrl, List<String> propertyName) {
+        List<String> params = new ArrayList();
+        String[] urlSplit = requestUrl.split("/");
+        String[] matchSplit = matchUrl.split("/");
+        Map<String, String> pathParams = new HashMap<>(propertyName.size());
+        int index = 0;
+        for (int i = 0; i < matchSplit.length; i++) {
+            if ("\\w*".equals(matchSplit[i])) {
+                pathParams.put(propertyName.get(index), urlSplit[i]);
+                index++;
+            }
+        }
+        return pathParams;
+    }
+
+    private void cros(HttpServletResponse response, CrosInfo cros) {
+        if (!Validate.isEmpty(cros)) {
+            response.setHeader("Access-Control-Allow-Origin", cros.getOrigins());
+            response.setHeader("Access-Control-Allow-Methods", StringUtils.join(cros.getMethods(), ","));
+            response.setHeader("Access-Control-Max-Age", cros.getMaxAge());
+            if (!StringUtils.isEmpty(cros.getHeaders())) {
+                response.setHeader("Access-Control-Allow-Headers", cros.getHeaders());
+            }
+            if (cros.isCookie()) {
+                response.setHeader("Access-Control-Allow-Credentials", "true");
+            } else {
+                response.setHeader("Access-Control-Allow-Credentials", "false");
+            }
+        }
+    }
+
 
     private void handle(HttpServletRequest req, HttpServletResponse resp, RequestHandleInfo requestHandleInfo) throws Exception {
         if (doInterceptor(req, resp, requestHandleInfo)) {
@@ -117,7 +183,6 @@ public class DispatcherServlet extends HttpServlet {
             }
         }
         if (!Validate.isEmpty(result)) {
-            //TODO CROS
             returnJsonStr(result, resp);
         }
     }
@@ -182,7 +247,14 @@ public class DispatcherServlet extends HttpServlet {
             } else {
                 for (Annotation annotation : annotatins) {
                     if (annotation.annotationType() == PathVariable.class) {
-                        //TODO 占位符的匹配
+                        PathVariable pathVariable = (PathVariable) annotation;
+                        Object path = req.getAttribute("pathParams");
+                        if (Validate.isEmpty(path)) {
+                            throw new RuntimeException(String.format("not get pathParma: %s", pathVariable.value()));
+                        } else {
+                            String paramValue = ((Map<String, String>) path).get(pathVariable.value());
+                            paramValues.add(baseCast(paramTypes[i], paramValue));
+                        }
                     } else if (annotation.annotationType() == RequestParam.class) {
                         // 解析参数,通过注解获取参数名
                         paramValues.add(cast(paramTypes[i], ((RequestParam) annotation).value(), requestParams, req, resp));
@@ -245,7 +317,7 @@ public class DispatcherServlet extends HttpServlet {
                 f.setAccessible(true);
                 Method m = null;
                 try {
-                    m = type.getMethod("set" + StringUtil.firstCharUpperCase(f.getName()), f.getType());
+                    m = type.getMethod("set" + WordUtils.capitalize(f.getName()), f.getType());
                     m.invoke(obj, v);
                 } catch (NoSuchMethodException e) {
                     log.warn(String.format("class '%s' has no set property for '%s'", type, f.getName()), e);

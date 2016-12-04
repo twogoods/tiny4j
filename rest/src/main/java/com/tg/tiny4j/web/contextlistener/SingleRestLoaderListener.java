@@ -1,5 +1,6 @@
 package com.tg.tiny4j.web.contextlistener;
 
+import com.tg.tiny4j.commons.constants.WebApplicationEnvironment;
 import com.tg.tiny4j.web.reader.WebScanedClassReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,8 +22,8 @@ public class SingleRestLoaderListener implements ServletContextListener {
         try {
             webScanedClassReader.initRequestMap();
             webScanedClassReader.instance4SingleMode();
-            servletContextEvent.getServletContext().setAttribute("run_mode", "single");
-            servletContextEvent.getServletContext().setAttribute("webrequestmapper", webScanedClassReader.getRequestMapper());
+            servletContextEvent.getServletContext().setAttribute(WebApplicationEnvironment.RUN_MODE, WebApplicationEnvironment.SINGLE_MODE);
+            servletContextEvent.getServletContext().setAttribute(WebApplicationEnvironment.WEBREQUESTMAPPER, webScanedClassReader.getRequestMapper());
         } catch (Exception e) {
             log.error("start rest failed", e);
         }

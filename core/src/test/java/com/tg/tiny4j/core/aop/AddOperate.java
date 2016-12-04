@@ -18,6 +18,12 @@ public class AddOperate implements Operate{
         return a+a;
     }
 
+    @Override
+    public int calno() {
+        return 0;
+    }
+
+
     public String getProp() {
         return prop;
     }

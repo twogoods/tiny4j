@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Created by twogoods on 16/11/9.
  */
-@Interceptor(pathPatterns = {"/base/test"},order = 2)
+@Interceptor(pathPatterns = {"/base/user"},order = 2)
 public class AInterceptor implements HandlerInterceptor{
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response) {

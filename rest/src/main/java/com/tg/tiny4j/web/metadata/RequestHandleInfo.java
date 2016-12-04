@@ -19,7 +19,8 @@ public class RequestHandleInfo {
     private Object instance;
     private String requestUrl;
     private String requestmethod;
-    private boolean cros;
+    private UrlPraseInfo urlPraseInfo;
+    private CrosInfo cros;
     private List<String> includeInterceptors = new ArrayList<>();
     private List<String> excludeInterceptors = new ArrayList<>();
     private Map<String, String> doInterceptors = new HashMap<>();
@@ -80,11 +81,19 @@ public class RequestHandleInfo {
         this.requestmethod = requestmethod;
     }
 
-    public boolean isCros() {
+    public UrlPraseInfo getUrlPraseInfo() {
+        return urlPraseInfo;
+    }
+
+    public void setUrlPraseInfo(UrlPraseInfo urlPraseInfo) {
+        this.urlPraseInfo = urlPraseInfo;
+    }
+
+    public CrosInfo getCros() {
         return cros;
     }
 
-    public void setCros(boolean cros) {
+    public void setCros(CrosInfo cros) {
         this.cros = cros;
     }
 

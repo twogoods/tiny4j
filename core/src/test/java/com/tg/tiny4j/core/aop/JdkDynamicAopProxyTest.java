@@ -23,7 +23,9 @@ public class JdkDynamicAopProxyTest {
         Operate addproxy=(Operate)jdkDynamicAopProxy.getProxy();
         //int result=addproxy.cal(2, 4);
 
-        Method m=addproxy.getClass().getDeclaredMethod("cal",int.class,int.class);
-        m.invoke(addproxy,2,4);
+//        Method m=addproxy.getClass().getDeclaredMethod("cal",int.class,int.class);
+//        m.invoke(addproxy,2,4);
+
+        addproxy.calno();
     }
 }
