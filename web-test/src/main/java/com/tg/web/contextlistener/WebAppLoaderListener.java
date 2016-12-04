@@ -20,7 +20,7 @@ import javax.servlet.ServletContextEvent;
 public class WebAppLoaderListener extends AbstractWebContextListener {
     private static final Logger log = LogManager.getLogger(WebAppLoaderListener.class);
 
-    final WebAppControllerReader webAppControllerReader = new WebAppControllerReader();
+    private final WebAppControllerReader webAppControllerReader = new WebAppControllerReader();
 
     @Override
     public void registerHandle(HandleRegistry registry) {

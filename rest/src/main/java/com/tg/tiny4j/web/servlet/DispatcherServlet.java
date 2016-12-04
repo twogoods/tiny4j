@@ -168,13 +168,14 @@ public class DispatcherServlet extends HttpServlet {
         Object result = null;
         try {
             if (method.getParameterCount() == 0) {
+                System.out.println(apis.get(requestHandleInfo.getBeanName()).getObject());
                 result = method.invoke(apis.get(requestHandleInfo.getBeanName()).getObject());
             } else {
                 result = method.invoke(apis.get(requestHandleInfo.getBeanName()).getObject(), praseParam(method, req, resp));
             }
         } catch (Exception e) {
-            log.error("error: {}", e);
-            ExceptionHandleInfo exceptionHandleInfo = getHandleInfo(e.getClass(), requestHandleInfo.getClassName());
+            log.error("error: {}", e.getCause());
+            ExceptionHandleInfo exceptionHandleInfo = getHandleInfo(e.getCause().getClass(), requestHandleInfo.getClassName());
             if (exceptionHandleInfo != null) {
                 doHandleException(exceptionHandleInfo.getMethod(), apis.get(requestHandleInfo.getBeanName()).getObject(), req, resp);
                 return;

@@ -4,5 +4,4 @@
         <property-file>application.properties</property-file>
         <component-scan>${code4j.component-scan:com.tg.web.controller}</component-scan>
     </configs>
-
 </beans>

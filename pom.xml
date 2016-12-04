@@ -12,7 +12,6 @@
         <module>rest</module>
         <module>web-test</module>
         <module>core</module>
-        <module>integration</module>
         <module>commons</module>
     </modules>
 

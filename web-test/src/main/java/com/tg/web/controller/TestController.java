@@ -47,7 +47,6 @@ public class TestController extends BaseController {
         return "haha";
     }
 
-
     @RequestMapping(mapUrl = "/index")
     @CROS
     public String paramTest(@RequestParam("id") long id, @RequestParam("name") String name) {

@@ -11,5 +11,9 @@ public class BaseController {
         return "error";
     }
 
+    @ExceptionHandler(TestException.class)
+    public String handleExc(){
+        return "test error";
+    }
 
 }
