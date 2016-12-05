@@ -27,7 +27,7 @@ public class WebApplicationContext extends AbstractApplicationContext {
         beanFactory.addBeanDefinition(beanDefinitionReader.getRegisterBeans());
     }
 
-    public Map<String, Object> getBean(List<String> names) throws Exception {
+    public Map<String, Object> getBeans(List<String> names) throws Exception {
         Map<String, Object> beans = new HashMap<>();
         for (String name : names) {
             beans.put(name, getBean(name));

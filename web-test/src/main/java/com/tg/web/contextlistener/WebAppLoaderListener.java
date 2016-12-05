@@ -41,7 +41,7 @@ public class WebAppLoaderListener extends AbstractWebContextListener {
     @Override
     public void requestMapInitialized(ServletContextEvent servletContextEvent, WebApplicationContext applicationContext) throws Exception {
         webAppControllerReader.initRequestMap();
-        webAppControllerReader.setInstances(applicationContext.getBean(webAppControllerReader.getControllerName()));
+        webAppControllerReader.setInstances(applicationContext.getBeans(webAppControllerReader.getControllerName()));
         servletContextEvent.getServletContext().setAttribute(WebApplicationEnvironment.WEBREQUESTMAPPER, webAppControllerReader.getRequestMapper());
     }
 }
