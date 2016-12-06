@@ -1,5 +1,6 @@
 package com.tg.tiny4j.web.servlet;
 
+import com.tg.tiny4j.commons.constants.WebApplicationEnvironment;
 import com.tg.tiny4j.commons.utils.JsonUtil;
 import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.web.annotation.PathVariable;
@@ -11,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -48,7 +48,7 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        requestMapper = (RequestMapper) getServletContext().getAttribute("webrequestmapper");
+        requestMapper = (RequestMapper) getServletContext().getAttribute(WebApplicationEnvironment.WEBREQUESTMAPPER);
         requestHandleMap = requestMapper.getRequestHandleMap();
         exceptionHandles = requestMapper.getExceptionHandles();
         apis = requestMapper.getApis();
@@ -86,7 +86,6 @@ public class DispatcherServlet extends HttpServlet {
                 handle(req, resp, requestHandleInfo);
             } catch (Exception e) {
                 log.error("error: {}", e);
-                //resp.sendError(500);
                 resp.setStatus(500);
             }
             return;

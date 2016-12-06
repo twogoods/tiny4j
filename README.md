@@ -64,5 +64,9 @@ public class TestController extends BaseController {
 }
 ```
 是不是感觉很熟悉，请看[详细说明](https://github.com/twogoods/tiny4j/tree/master/rest)
+TODO
+
+* 基于Servlet3.0使用注解取代web.xml消除配置
+* 类似SpringBoot使用内嵌的Tomcat
 ### AOP
 TODO

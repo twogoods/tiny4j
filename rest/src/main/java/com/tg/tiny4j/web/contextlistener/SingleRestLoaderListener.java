@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
 /**
  * Created by twogoods on 16/11/2.
  */
@@ -15,6 +16,7 @@ public class SingleRestLoaderListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
+        //TODO 去掉Web.xml下的包配置,使用注解?
         String packages = servletContextEvent.getServletContext().getInitParameter("component-scan").toString();
         log.debug("auto package: {}", packages);
         WebScanedClassReader webScanedClassReader = new WebScanedClassReader();
