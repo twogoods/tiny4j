@@ -87,7 +87,7 @@ application.xml增加一些config的配置，`Bean`以及更多的配置参见co
     <configs>
         <!--配置文件-->
         <property-file>application.properties</property-file>
-        <component-scan>${code4j.component-scan:com.tg.web.controller}</component-scan>
+        <component-scan>${tiny4j.component-scan:com.tg.web.controller}</component-scan>
     </configs>
 </beans>
 ```

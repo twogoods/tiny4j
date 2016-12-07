@@ -35,7 +35,7 @@ serviceBean2.service();
 <beans>
     <configs>
         <property-file>application.properties</property-file>
-        <component-scan>${code4j.component-scan:com.tg}</component-scan>
+        <component-scan>${tiny4j.component-scan:com.tg}</component-scan>
     </configs>
 
     <bean id="testDao" class="com.tg.tiny4j.core.ioc.beans.reader.DaoBean"></bean>
