@@ -6,8 +6,8 @@ import com.tg.tiny4j.web.exception.UrlDuplicatedException;
 import com.tg.tiny4j.web.metadata.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * Created by twogoods on 16/11/2.
  */
 public abstract class AbstractClassReader implements Reader {
-    private static Logger log = LogManager.getLogger(AbstractClassReader.class);
+    private static Logger log = LoggerFactory.getLogger(AbstractClassReader.class);
 
     private RequestMapper requestMapper = new RequestMapper();
 

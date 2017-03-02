@@ -2,8 +2,6 @@ package com.tg.tiny4j.core.web.integration;
 
 import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.beans.reader.XmlBeanDefinitionReader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 /**

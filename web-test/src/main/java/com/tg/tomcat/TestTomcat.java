@@ -12,6 +12,7 @@ import java.io.File;
  * Created by twogoods on 16/10/21.
  */
 public class TestTomcat {
+    //http://blog.csdn.net/hengyunabc/article/details/50120001
     public static void main(String[] args) throws Exception {
         String webappDirLocation = "web-test/src/main/webapp/";
         Tomcat tomcat = new Tomcat();

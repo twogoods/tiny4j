@@ -1,8 +1,8 @@
 package com.tg.tiny4j.core.web.integration;
 
 import com.tg.tiny4j.commons.constants.WebApplicationEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -12,7 +12,7 @@ import javax.servlet.ServletContextListener;
  */
 public abstract class AbstractWebContextListener implements ServletContextListener {
 
-    private static Logger log = LogManager.getLogger(AbstractWebContextListener.class);
+    private static Logger log = LoggerFactory.getLogger(AbstractWebContextListener.class);
 
     private HandleRegistry registry = new HandleRegistry();
 

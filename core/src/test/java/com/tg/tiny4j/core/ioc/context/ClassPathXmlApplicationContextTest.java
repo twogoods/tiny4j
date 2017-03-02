@@ -2,12 +2,14 @@ package com.tg.tiny4j.core.ioc.context;
 
 import com.tg.tiny4j.core.ioc.beans.reader.ConfigBean;
 import com.tg.tiny4j.core.ioc.beans.reader.ServiceBean;
+import org.junit.Test;
 
 /**
  * Created by twogoods on 16/10/27.
  */
 public class ClassPathXmlApplicationContextTest {
-    public static void main(String[] args) throws Exception {
+    @Test
+    public void test() throws Exception {
         System.out.println("1******************");
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("test.xml");
 

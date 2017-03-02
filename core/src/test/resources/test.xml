@@ -11,7 +11,6 @@
 
     <bean id="testService" class="com.tg.tiny4j.core.ioc.beans.reader.ServiceBean">
         <property name="s1" value="s1"></property>
-        <property name="s1" value="s1"></property>
         <property name="s2" value="s2"></property>
         <property name="daoBean" ref="testDao"></property>
     </bean>

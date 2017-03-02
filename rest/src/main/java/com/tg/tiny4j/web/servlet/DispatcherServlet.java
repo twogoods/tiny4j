@@ -10,8 +10,9 @@ import com.tg.tiny4j.web.metadata.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +34,7 @@ import java.util.regex.Pattern;
  * Created by twogoods on 16/11/7.
  */
 public class DispatcherServlet extends HttpServlet {
-    private static Logger log = LogManager.getLogger(DispatcherServlet.class);
+    private static Logger log = LoggerFactory.getLogger(DispatcherServlet.class);
 
     private RequestMapper requestMapper;
 

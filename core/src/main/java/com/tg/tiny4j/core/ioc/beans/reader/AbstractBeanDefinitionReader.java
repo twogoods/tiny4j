@@ -5,8 +5,8 @@ import com.tg.tiny4j.core.ioc.exception.ConfigurationException;
 import com.tg.tiny4j.core.ioc.resource.ResourceLoad;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -14,7 +14,7 @@ import java.util.*;
  * Created by twogoods on 16/10/26.
  */
 public abstract class AbstractBeanDefinitionReader implements BeanDefinitionReader {
-    private static Logger log= LogManager.getLogger(AbstractBeanDefinitionReader.class);
+    private static final Logger log= LoggerFactory.getLogger(AbstractBeanDefinitionReader.class);
 
     private Map<String, BeanDefinition> registerBeans;
 

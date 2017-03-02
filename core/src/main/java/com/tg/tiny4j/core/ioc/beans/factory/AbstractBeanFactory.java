@@ -9,8 +9,8 @@ import com.tg.tiny4j.core.aop.advice.Target;
 import com.tg.tiny4j.core.ioc.beans.*;
 import com.tg.tiny4j.core.ioc.exception.BeanException;
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -21,7 +21,7 @@ import java.util.*;
  */
 public abstract class AbstractBeanFactory implements BeanFactory {
 
-    private static Logger log = LogManager.getLogger(AbstractBeanFactory.class);
+    private static Logger log = LoggerFactory.getLogger(AbstractBeanFactory.class);
 
     private Map<String, BeanDefinition> beans = new HashMap<>();
 

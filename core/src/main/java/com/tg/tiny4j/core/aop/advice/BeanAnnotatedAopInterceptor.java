@@ -4,8 +4,8 @@ import com.tg.tiny4j.commons.utils.Validate;
 import com.tg.tiny4j.core.ioc.beans.BeanDefinition;
 import com.tg.tiny4j.core.ioc.beans.factory.BeanFactory;
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -15,7 +15,7 @@ import java.util.Map;
  */
 
 public class BeanAnnotatedAopInterceptor implements AopInterceptor {
-    private static final Logger log = LogManager.getLogger(BeanAnnotatedAopInterceptor.class);
+    private static final Logger log = LoggerFactory.getLogger(BeanAnnotatedAopInterceptor.class);
 
     private Map<String, String> methodsMap;
 

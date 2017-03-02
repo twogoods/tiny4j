@@ -7,8 +7,8 @@ import com.tg.tiny4j.core.ioc.beans.BeanReference;
 import com.tg.tiny4j.core.ioc.exception.BeanDefinitionException;
 import com.tg.tiny4j.core.ioc.resource.ResourceLoad;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -23,7 +23,7 @@ import java.util.List;
  * Created by twogoods on 16/10/25.
  */
 public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
-    private static Logger log = LogManager.getLogger(XmlBeanDefinitionReader.class);
+    private static Logger log = LoggerFactory.getLogger(XmlBeanDefinitionReader.class);
 
     private String location;
 

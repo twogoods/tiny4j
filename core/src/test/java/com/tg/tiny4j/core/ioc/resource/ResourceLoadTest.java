@@ -11,7 +11,7 @@ import java.io.InputStream;
 public class ResourceLoadTest {
     @Test
     public void test() throws IOException {
-        Resource resource=ResourceLoad.getInstance().loadResource("Resource.class");
+        Resource resource=ResourceLoad.getInstance().loadResource("test.xml");
         InputStream inputStream=resource.getInputStream();
         byte[] bytes=new byte[1024];
         inputStream.read(bytes);

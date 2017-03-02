@@ -2,9 +2,8 @@ package com.tg.tiny4j.web.contextlistener;
 
 import com.tg.tiny4j.commons.constants.WebApplicationEnvironment;
 import com.tg.tiny4j.web.reader.WebScanedClassReader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -12,7 +11,7 @@ import javax.servlet.ServletContextListener;
  * Created by twogoods on 16/11/2.
  */
 public class SingleRestLoaderListener implements ServletContextListener {
-    private static Logger log = LogManager.getLogger(SingleRestLoaderListener.class);
+    private static Logger log = LoggerFactory.getLogger(SingleRestLoaderListener.class);
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {

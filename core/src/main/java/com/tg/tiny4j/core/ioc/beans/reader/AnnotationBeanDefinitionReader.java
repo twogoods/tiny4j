@@ -7,8 +7,8 @@ import com.tg.tiny4j.core.ioc.beans.BeanReference;
 import com.tg.tiny4j.core.ioc.exception.BeanDefinitionException;
 import com.tg.tiny4j.core.ioc.annotation.*;
 import com.tg.tiny4j.commons.data.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -19,7 +19,7 @@ import java.util.*;
  * Created by twogoods on 16/10/26.
  */
 public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinitionReader {
-    private static Logger log = LogManager.getLogger(AnnotationBeanDefinitionReader.class);
+    private static Logger log = LoggerFactory.getLogger(AnnotationBeanDefinitionReader.class);
 
     private List<String> scanPackages = new ArrayList<>();
 
