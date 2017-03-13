@@ -22,7 +22,6 @@ public abstract class AbstractWebContextListener implements ServletContextListen
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-
         WebApplicationContext webApplicationContext;
         try {
             registerHandle(registry);

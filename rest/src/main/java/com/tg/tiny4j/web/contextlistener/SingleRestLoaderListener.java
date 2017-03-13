@@ -1,9 +1,13 @@
 package com.tg.tiny4j.web.contextlistener;
 
+import com.tg.tiny4j.commons.constants.Configuration;
 import com.tg.tiny4j.commons.constants.WebApplicationEnvironment;
+import com.tg.tiny4j.web.reader.ConfigLoader;
 import com.tg.tiny4j.web.reader.WebScanedClassReader;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -16,7 +20,11 @@ public class SingleRestLoaderListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         //TODO 去掉Web.xml下的包配置,使用注解?
-        String packages = servletContextEvent.getServletContext().getInitParameter("component-scan").toString();
+        System.out.println("init");
+        String packages = ConfigLoader.getConfigMap().get(Configuration.COMPONENTSCAN);
+        if (StringUtils.isEmpty(packages)) {
+            packages = servletContextEvent.getServletContext().getInitParameter("component-scan");
+        }
         log.debug("auto package: {}", packages);
         WebScanedClassReader webScanedClassReader = new WebScanedClassReader();
         webScanedClassReader.loadClass(packages);
@@ -32,6 +40,6 @@ public class SingleRestLoaderListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-
+        System.out.println("destroyed");
     }
 }

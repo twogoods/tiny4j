@@ -30,7 +30,6 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
         Properties prop = null;
         try {
             prop = ResourceLoad.getInstance().loadConfig(filePath);
-            prop.propertyNames();
             Enumeration en = prop.propertyNames();
             while (en.hasMoreElements()) {
                 String strKey = (String) en.nextElement();

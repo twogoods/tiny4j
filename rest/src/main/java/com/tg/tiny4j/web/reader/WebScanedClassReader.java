@@ -1,5 +1,6 @@
 package com.tg.tiny4j.web.reader;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,11 +16,13 @@ public class WebScanedClassReader extends AbstractClassReader {
     Set<Class> classSet = new HashSet<>();
 
     public void loadClass(String packageConfig) {
+        if(StringUtils.isEmpty(packageConfig)){
+            return;
+        }
         try {
             for (String p : packageConfig.split(",")) {
                 ClassScanner.getClasses(ClassScanner.getPathByPackage(p), classSet);
             }
-
             log.debug("get class:{}", classSet);
             for (Class clazz : classSet) {
                 read(clazz);
