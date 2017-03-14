@@ -43,8 +43,7 @@ public class AutoSetterCglibAopProxy extends CglibAopProxy{
             try {
                 objCla.getDeclaredMethod(setterName,f.getType());
             } catch (NoSuchMethodException e) {
-                im.add(new Signature(setterName, Type.VOID_TYPE,
-                        new Type[]{Type.getType(f.getType())}), null);
+                im.add(new Signature(setterName, Type.VOID_TYPE,new Type[]{Type.getType(f.getType())}), null);
                 autoSetter.put(setterName,setterName);
             }
         }

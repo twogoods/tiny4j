@@ -10,18 +10,12 @@ import java.util.Set;
  */
 public class BeanDefinition {
     private Object bean;
-
     private String id;
-
     private String classname;
-
     private Class clazz;
-
     private Set<BeanPropertyValue> properties=new HashSet<BeanPropertyValue>();
 
-    public BeanDefinition() {
-
-    }
+    public BeanDefinition() {}
 
     public BeanDefinition(String id, String classname) throws ClassNotFoundException {
         this.id = id;

@@ -19,27 +19,23 @@ public class CglibDynamicAopProxyTest {
         AopAdvice aopAdvice=new AopAdvice();
         aopAdvice.setTarget(new Target(Add.class));
         aopAdvice.setInterceptor(new TestAopInterceptor());
-        AutoSetterCglibAopProxy cglibDynamicAopProxy=new AutoSetterCglibAopProxy(aopAdvice);
-        //CglibAopProxy cglibDynamicAopProxy=new CglibAopProxy(aopAdvice);
+        CglibAopProxy cglibDynamicAopProxy=new CglibAopProxy(aopAdvice);
         Add operate=(Add) cglibDynamicAopProxy.getProxy();
         System.out.println(operate.add(1, 2));
+    }
 
-
-        //System.out.println(operate.getClass().getField("prop"));
-//        Method[] methods=operate.getClass().getMethods();
-//        for(Method m:methods){
-//            System.out.println(m);
-//        }
+    @Test
+    public void autoSetTest() throws Exception {
+        AopAdvice aopAdvice=new AopAdvice();
+        aopAdvice.setTarget(new Target(Add.class));
+        aopAdvice.setInterceptor(new TestAopInterceptor());
+        AutoSetterCglibAopProxy cglibDynamicAopProxy=new AutoSetterCglibAopProxy(aopAdvice);
+        Add operate=(Add) cglibDynamicAopProxy.getProxy();
+        System.out.println(operate.add(1, 2));
         System.out.println("*******");
-
         Method setM=operate.getClass().getMethod("setProp", String.class);
         System.out.println(setM);
         setM.invoke(operate, "set");
         System.out.println(operate.getProp());
-
-//        Method m=operate.getClass().getMethod("add", Integer.TYPE, Integer.TYPE);
-//        m.setAccessible(true);
-//        Object result=m.invoke(operate, 1, 2);
-//        System.out.println(result instanceof Integer);
     }
 }

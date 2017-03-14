@@ -35,6 +35,11 @@ public class BeanAnnotatedAopInterceptor implements AopInterceptor {
         this.beanFactory = beanFactory;
     }
 
+    public BeanAnnotatedAopInterceptor(Map<String, String> methodsMap, Map<String, BeanDefinition> beans) {
+        this.methodsMap = methodsMap;
+        this.beans = beans;
+    }
+
     @Override
     public Object invoke(Methodinvocation invocation) throws Throwable {
         String methodName = invocation.getMethod().getName();
@@ -48,7 +53,6 @@ public class BeanAnnotatedAopInterceptor implements AopInterceptor {
                 return null;
             }
         }
-
         if (methodsMap.containsKey(methodName)) {
             log.debug("interceptor the @Bean method:{}", methodName);
             Object bean = beans.get(methodsMap.get(methodName)).getBean();

@@ -49,7 +49,7 @@ public abstract class AbstractBeanFactory implements BeanFactory {
 
     private Object createBeanAnnotatedBean(BeanAnnotatedDefinition beanAnnotatedDefinition) throws Exception {
         /**
-         * 1.创建一个普通对象,把属性都付好值
+         * 1.创建一个普通对象,把属性都赋好值
          * 2.设置aopadvice
          * 3.创建cglib代理对象
          * 4.为这个代理对象附上1中得到对象的属性值
