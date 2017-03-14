@@ -20,7 +20,7 @@ public class SingleRestLoaderListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         //TODO 去掉Web.xml下的包配置,使用注解?
-        System.out.println("init");
+        log.info("contextInit...");
         String packages = ConfigLoader.getConfigMap().get(Configuration.COMPONENTSCAN);
         if (StringUtils.isEmpty(packages)) {
             packages = servletContextEvent.getServletContext().getInitParameter("component-scan");

@@ -49,6 +49,7 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+        log.info("DispatcherServlet init...");
         requestMapper = (RequestMapper) getServletContext().getAttribute(WebApplicationEnvironment.WEBREQUESTMAPPER);
         requestHandleMap = requestMapper.getRequestHandleMap();
         exceptionHandles = requestMapper.getExceptionHandles();
@@ -57,7 +58,11 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     private String getUrl(HttpServletRequest req) {
-        String pathInfo = req.getServletPath();
+        log.info(req.getPathInfo());
+        log.info(req.getRequestURI());
+        log.info(req.getServletPath());
+        log.info(req.getContextPath());
+        String pathInfo = req.getPathInfo();
         if (pathInfo.endsWith("/")) {
             return pathInfo.substring(0, pathInfo.length() - 1);
         }

@@ -2,7 +2,10 @@ package com.tg.tomcat;
 
 import com.tg.tiny4j.web.contextlistener.SingleRestLoaderListener;
 import com.tg.tiny4j.web.reader.ConfigLoader;
+import com.tg.tiny4j.web.servlet.DispatcherServlet;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import javax.servlet.ServletException;
@@ -10,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * Description:
@@ -25,10 +29,12 @@ public class InnerJetty {
         ConfigLoader.loadConfig();
         System.out.println(ConfigLoader.getConfigMap());
         Server server = new Server(8080);
+
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/");
-//        context.addEventListener(new SingleRestLoaderListener());
-        context.addServlet(HelloServlet.class, "/*");
+        context.setContextPath("/twogoods");
+        context.addEventListener(new SingleRestLoaderListener());
+        context.addServlet(DispatcherServlet.class, "/*");
+
         server.setHandler(context);
         server.start();
         server.join();
@@ -37,10 +43,38 @@ public class InnerJetty {
 
     public static class HelloServlet extends HttpServlet {
         @Override
-        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        public void init() throws ServletException {
+            System.out.println("HelloServlet init...");
+        }
+
+        @Override
+        protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
             response.setContentType("text/html");
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("<h1>Hello from HelloServlet</h1>");
+        }
+    }
+
+    public static class DefaultServlet extends HttpServlet {
+        @Override
+        protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("<h1>default</h1>");
+        }
+    }
+
+    public static class HelloHandler extends AbstractHandler {
+        public void handle(String target,
+                           Request baseRequest,
+                           HttpServletRequest request,
+                           HttpServletResponse response) throws IOException,
+                ServletException {
+            response.setContentType("text/html; charset=utf-8");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            PrintWriter out = response.getWriter();
+            out.println("<h1>" + 404 + "</h1>");
+            baseRequest.setHandled(true);
         }
     }
 }

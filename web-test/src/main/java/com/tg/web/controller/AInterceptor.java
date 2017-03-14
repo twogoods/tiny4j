@@ -25,7 +25,7 @@ public class AInterceptor implements HandlerInterceptor{
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("**********   A  interceptor      ********");
         System.out.println(name);
-        userService.query();
+//        userService.query();
         System.out.println("**********   A  interceptor end  ********");
         return true;
     }
