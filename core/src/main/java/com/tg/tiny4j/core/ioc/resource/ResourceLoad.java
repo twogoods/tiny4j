@@ -21,7 +21,6 @@ public class ResourceLoad {
     }
 
     public Resource loadResource(String location) {
-        //classloader会从根目录加载
         URL url = getClass().getClassLoader().getResource(location);
         return new UrlResource(url);
     }

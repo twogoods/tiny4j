@@ -34,7 +34,7 @@ public abstract class AbstractClassReader implements Reader {
          */
         if (clazz.isAnnotationPresent(Api.class)) {
             Api api = (Api) clazz.getAnnotation(Api.class);
-            //TODO 可以增加一个可配置的全局的contextPath
+            //TODO apiBaseUrl 为""或者"/"时
             String apiBaseUrl = api.value();
             ControllerInfo controllerInfo = new ControllerInfo();
             String beanName = getBeanName(api.name(), clazz);

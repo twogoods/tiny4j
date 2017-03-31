@@ -58,11 +58,17 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     private String getUrl(HttpServletRequest req) {
-        log.info(req.getPathInfo());
-        log.info(req.getRequestURI());
-        log.info(req.getServletPath());
-        log.info(req.getContextPath());
         String pathInfo = req.getPathInfo();
+        if (StringUtils.isEmpty(pathInfo)) {
+            pathInfo = req.getServletPath();
+        }
+        if(StringUtils.isEmpty(pathInfo)){
+            String uri = req.getRequestURI();
+            String contextPath = req.getContextPath();
+            if (contextPath != null && contextPath.length() > 0) {
+                pathInfo = uri.substring(contextPath.length());
+            }
+        }
         if (pathInfo.endsWith("/")) {
             return pathInfo.substring(0, pathInfo.length() - 1);
         }
@@ -72,8 +78,6 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String pathInfo = getUrl(req);
-        log.info("url path: " + pathInfo);
-
         RequestHandleInfo requestHandleInfo;
         String matchResult = matchRequestHandleUrl(pathInfo);
         if (StringUtils.isEmpty(matchResult)) {
@@ -98,6 +102,7 @@ public class DispatcherServlet extends HttpServlet {
         }
         // 不考虑静态资源的问题
         resp.setStatus(404);
+        log.info("url not find handle : " + pathInfo);
     }
 
     private String matchRequestHandleUrl(String requestUrl) {

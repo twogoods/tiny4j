@@ -14,12 +14,11 @@ import java.util.*;
  * Created by twogoods on 16/10/26.
  */
 public abstract class AbstractBeanDefinitionReader implements BeanDefinitionReader {
-    private static final Logger log= LoggerFactory.getLogger(AbstractBeanDefinitionReader.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractBeanDefinitionReader.class);
 
     private Map<String, BeanDefinition> registerBeans;
 
     private Map<String, String> configMap;
-
 
     public AbstractBeanDefinitionReader() {
         registerBeans = new HashMap<>();
@@ -34,11 +33,11 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
             while (en.hasMoreElements()) {
                 String strKey = (String) en.nextElement();
                 configMap.put(strKey, prop.getProperty(strKey));
-                log.debug("get config : {} = {}",strKey , prop.getProperty(strKey));
+                log.debug("get config : {} = {}", strKey, prop.getProperty(strKey));
             }
         } catch (ConfigurationException e) {
             log.warn(e.getMessage());
-        }catch (Exception e1){
+        } catch (Exception e1) {
             throw e1;
         }
     }
@@ -49,13 +48,18 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
     }
 
 
-    protected String getConfigValue(PlaceholderPraser.KeyAndDefault valueAndDefault){
-        String value=configMap.get(valueAndDefault.getName());
-        if(value==null){
+    protected String getConfigValue(PlaceholderPraser.KeyAndDefault valueAndDefault) {
+        String value = configMap.get(valueAndDefault.getName());
+        if (value == null) {
             return valueAndDefault.getDefaultValue();
         }
         return value;
     }
+
+    protected String getConfigValue(String element) {
+        return configMap.get(element);
+    }
+
     /**
      * 通过全类名得到bean名
      *
@@ -76,6 +80,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
         }
         return annotName;
     }
+
     protected String getBeanName(String annotName, String defaultName) {
         if (StringUtils.isEmpty(annotName)) {
             return WordUtils.uncapitalize(defaultName);

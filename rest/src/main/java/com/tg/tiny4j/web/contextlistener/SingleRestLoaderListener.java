@@ -1,6 +1,5 @@
 package com.tg.tiny4j.web.contextlistener;
 
-import com.tg.tiny4j.commons.constants.Configuration;
 import com.tg.tiny4j.commons.constants.WebApplicationEnvironment;
 import com.tg.tiny4j.web.reader.ConfigLoader;
 import com.tg.tiny4j.web.reader.WebScanedClassReader;
@@ -21,14 +20,14 @@ public class SingleRestLoaderListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         //TODO 去掉Web.xml下的包配置,使用注解?
         log.info("contextInit...");
-        String packages = ConfigLoader.getConfigMap().get(Configuration.COMPONENTSCAN);
-        if (StringUtils.isEmpty(packages)) {
-            packages = servletContextEvent.getServletContext().getInitParameter("component-scan");
-        }
-        log.debug("auto package: {}", packages);
-        WebScanedClassReader webScanedClassReader = new WebScanedClassReader();
-        webScanedClassReader.loadClass(packages);
         try {
+            String packages = ConfigLoader.loadConfig().getComponentscan();
+            if (StringUtils.isEmpty(packages)) {
+                packages = servletContextEvent.getServletContext().getInitParameter("component-scan");
+            }
+            log.debug("auto package: {}", packages);
+            WebScanedClassReader webScanedClassReader = new WebScanedClassReader();
+            webScanedClassReader.loadClass(packages);
             webScanedClassReader.initRequestMap();
             webScanedClassReader.instance4SingleMode();
             servletContextEvent.getServletContext().setAttribute(WebApplicationEnvironment.RUN_MODE, WebApplicationEnvironment.SINGLE_MODE);
@@ -40,6 +39,6 @@ public class SingleRestLoaderListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-        System.out.println("destroyed");
+        log.info("SingleRestLoaderListener destroyed...");
     }
 }

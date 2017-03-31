@@ -41,7 +41,9 @@ public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
             Document doc = docBuilder.parse(inputStream);
             Element root = doc.getDocumentElement();
             initConfig(root);
+            //解析xml里配置的bean
             praseBeanDefinitions(root);
+            //开始扫描注解的bean
             super.loadResource();
         } finally {
             inputStream.close();
@@ -67,10 +69,9 @@ public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
             return;
         }
         Element configRoot = (Element) propertieslist.item(0);
-
         //配置文件
         NodeList propertyFiles = configRoot.getElementsByTagName("property-file");
-        if (propertyFiles.getLength() > 110) {
+        if (propertyFiles.getLength() > 0) {
             String filesPath = propertyFiles.item(0).getTextContent();
             if (StringUtils.isEmpty(filesPath)) {
                 return;
@@ -83,7 +84,7 @@ public class XmlBeanDefinitionReader extends AnnotationBeanDefinitionReader {
             //默认取application.properties
             loadConfig("application.properties");
         }
-        //扫描的包
+        //设置扫描的包
         NodeList packageFiles = configRoot.getElementsByTagName("component-scan");
         if (packageFiles.getLength() > 0) {
             String packageNames = packageFiles.item(0).getTextContent();

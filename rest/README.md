@@ -1,8 +1,99 @@
 # rest
-web框架支持rest，json格式，不提供MVC的V了，基于自己以前的使用经历，会实现Spring里高频的功能以及对一些SpringMvc中不好处理的地方提供更好的支持。
-rest在设计时就考虑希望可以拆开IOC独立实现,IOC可以单独使用，rest也可以离开IOC单独使用。这样拆开来代码实现也清晰一些,这样我自己实现或者其他同学想了解一个简单的web实现都更容易一些。当然Spring全家桶用多了在一个web程序里居然没有IOC功能是有点不可想象的，确实rest提供单独使用好像意义不大，有机会看看rest可不可以与Spring的IOC配合起来。
-### 初始化
-#### single模式
+web框架支持rest，json格式，不提供MVC的V了，基于自己以前的使用经历，会实现SpringMvc里高频的功能以及对一些SpringMvc中不好处理的地方提供更好的支持。
+rest模块在设计时就考虑希望可以拆开IOC独立实现,IOC可以单独使用，rest也可以离开IOC单独使用。这样拆开来代码实现也清晰一些,这样我自己实现或者其他同学想了解一个简单的web实现都更容易一些。
+### SpringBoot风格的可执行Jar
+SpringBoot以约定大于配置的思想极大的简化了spring项目的配置内容，并提供了一个内嵌容器的可执行Jar，使得部署、管理都更加容易。rest也在尝试模仿SpringBoot的风格，做了一个简化的实现。
+#### helloworld
+```
+//boot应用请继承AbstractBootContextListener
+public class BootAppLoaderListener extends AbstractBootContextListener {
+    private static final Logger log = LogManager.getLogger(BootAppLoaderListener.class);
+
+    private final WebAppControllerReader webAppControllerReader = new WebAppControllerReader();
+
+    @Override
+    public void registerHandle(HandleRegistry registry) {
+        HandleAnnotation handle = new HandleAnnotation() {
+            @Override
+            public BeanDefinition handle(Class clazz) throws Exception {
+                BaseInfo baseInfo = webAppControllerReader.read(clazz);
+                if (Validate.isEmpty(baseInfo)) {
+                    return null;
+                } else {
+                    return new BeanDefinition(baseInfo.getName(), baseInfo.getClassName());
+                }
+            }
+        };
+        registry.addHandle(handle);
+    }
+
+    @Override
+    public void requestMapInitialized(ServletContextEvent servletContextEvent, WebApplicationContext applicationContext) throws Exception {
+        webAppControllerReader.initRequestMap();
+        webAppControllerReader.setInstances(applicationContext.getBeans(webAppControllerReader.getControllerName()));
+        servletContextEvent.getServletContext().setAttribute(WebApplicationEnvironment.WEBREQUESTMAPPER, webAppControllerReader.getRequestMapper());
+    }
+}
+
+@Api
+public class Application {
+    @RequestMapping
+    public String home() {
+        return "Hello World!";
+    }
+    public static void main(String[] args) {
+        TinyApplication.run(BootAppLoaderListener.class, args);
+    }
+}
+```
+配置`application.properties`
+
+```
+tiny4j.component-scan = com.xxx.yyy
+tiny4j.server.contextPath = /twogoods
+tiny4j.server.port = 8080
+```
+#### 打包
+不造轮子，直接使用SpringBoot的Maven插件(gradle也类似)
+
+```
+ <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>1.5.2.RELEASE</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+ </plugins>
+```
+#### 单独使用
+上面helloworld的代码整合了IOC，如果单独使用直接使用`SingleRestLoaderListener`
+
+```
+@Api
+public class Application {
+    @RequestMapping
+    public String home() {
+        return "Hello World!";
+    }
+    public static void main(String[] args) {
+        TinyApplication.run(BootAppLoaderListener.class, args);
+    }
+}
+
+```
+更多请参考`web-containerembed`测试模块。
+### 传统的war形式
+#### 单独模式
 即脱离IOC单独使用rest，所有的配置都在web.xml里
 
 ```
@@ -28,7 +119,7 @@ rest在设计时就考虑希望可以拆开IOC独立实现,IOC可以单独使用
     </servlet-mapping>
 </web-app>
 ```
-#### container模式
+#### 整合模式
 配合IOC使用,导入core模块依赖,继承`AbstractWebContextListener`完成自己的`ContextListener`（复制下面代码即可)
 
 ```
@@ -91,7 +182,9 @@ application.xml增加一些config的配置，`Bean`以及更多的配置参见co
     </configs>
 </beans>
 ```
-###使用
+
+
+### 具体使用
 rest提供了一些注解可以方便的使用，熟悉SpringMvc的同学一看就懂了。`@CROS`加上此注解就可跨域，可以配置请求源，方法等；`@PathVariable`，`@RequestParam`，`@RequestParam`和SpringMvc用法一样；方法返回值会转换成Json输出。
 
 ```
@@ -159,5 +252,3 @@ public class TestController extends BaseController {
 }
 ```
 更多请直接查看[例子](https://github.com/twogoods/tiny4j/tree/master/web-test)
-###最后
-看，是不是很像SpringMvc，→_→哈哈

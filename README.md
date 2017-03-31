@@ -19,7 +19,7 @@ System.out.println("holder get bean : "+holder.getBean("serviceBean"));
 ```
 [详细说明](https://github.com/twogoods/tiny4j/tree/master/core)
 ### rest
-不多说直接上代码
+不多说直接上controller代码
 
 ```
 @Api("/base")
@@ -63,10 +63,11 @@ public class TestController extends BaseController {
     }
 }
 ```
-是不是感觉很熟悉，请看[详细说明](https://github.com/twogoods/tiny4j/tree/master/rest)  
+是不是感觉很熟悉，SpringMvc既视感...  
+**现已支持SpringBoot风格的可执行jar**，请看[详细说明](https://github.com/twogoods/tiny4j/tree/master/rest)  
 TODO
 
-* 类似SpringBoot使用内嵌的Tomcat并消除配置
+* 反射优化
 
 ### AOP
 TODO

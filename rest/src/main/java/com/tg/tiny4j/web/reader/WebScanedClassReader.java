@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,20 +17,25 @@ public class WebScanedClassReader extends AbstractClassReader {
     Set<Class> classSet = new HashSet<>();
 
     public void loadClass(String packageConfig) {
-        if(StringUtils.isEmpty(packageConfig)){
+        if (StringUtils.isEmpty(packageConfig)) {
             return;
         }
         try {
-            for (String p : packageConfig.split(",")) {
-                ClassScanner.getClasses(ClassScanner.getPathByPackage(p), classSet);
-            }
-            log.debug("get class:{}", classSet);
+            Set<String> classes = ClassScanner.getClasses(packageConfig.split(","));
+            log.debug("get class:{}", classes);
+            loadClasses(classes);
             for (Class clazz : classSet) {
                 read(clazz);
             }
         } catch (Exception e) {
             log.error("loadclass error:{}", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private void loadClasses(Set<String> classes) throws ClassNotFoundException {
+        for (String className : classes) {
+            classSet.add(Class.forName(className));
         }
     }
 }

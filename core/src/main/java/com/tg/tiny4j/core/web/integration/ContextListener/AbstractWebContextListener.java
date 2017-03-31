@@ -1,6 +1,9 @@
-package com.tg.tiny4j.core.web.integration;
+package com.tg.tiny4j.core.web.integration.ContextListener;
 
 import com.tg.tiny4j.commons.constants.WebApplicationEnvironment;
+import com.tg.tiny4j.core.web.integration.HandleRegistry;
+import com.tg.tiny4j.core.web.integration.context.ServletContainerApplicationContext;
+import com.tg.tiny4j.core.web.integration.context.WebApplicationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +17,7 @@ public abstract class AbstractWebContextListener implements ServletContextListen
 
     private static Logger log = LoggerFactory.getLogger(AbstractWebContextListener.class);
 
+    private  WebApplicationContext webApplicationContext;
     private HandleRegistry registry = new HandleRegistry();
 
     public abstract void registerHandle(HandleRegistry registry);
@@ -22,10 +26,9 @@ public abstract class AbstractWebContextListener implements ServletContextListen
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        WebApplicationContext webApplicationContext;
         try {
             registerHandle(registry);
-            webApplicationContext = new WebApplicationContext(registry.getHandle());
+            webApplicationContext = new ServletContainerApplicationContext(registry.getHandle());
             requestMapInitialized(servletContextEvent, webApplicationContext);
             servletContextEvent.getServletContext().setAttribute(WebApplicationEnvironment.RUN_MODE, WebApplicationEnvironment.CONTAINER_MODE);
 //            servletContextEvent.getServletContext().setAttribute("root_applicationcontext", webApplicationContext);
@@ -36,6 +39,6 @@ public abstract class AbstractWebContextListener implements ServletContextListen
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-
+        log.info("SingleRestLoaderListener destroyed...");
     }
 }

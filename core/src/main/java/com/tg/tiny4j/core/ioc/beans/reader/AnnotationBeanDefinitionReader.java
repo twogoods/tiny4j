@@ -34,10 +34,15 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
 
     @Override
     public void loadResource() throws Exception {
-        for (String p : scanPackages) {
-            ClassScanner.getClasses(ClassScanner.getPathByPackage(p), classSet);
-        }
+        Set<String> classes = ClassScanner.getClasses(scanPackages);
+        loadClasses(classes);
         praseAutoConfigurationClass();
+    }
+
+    private void loadClasses(Set<String> classes) throws ClassNotFoundException {
+        for (String className : classes) {
+            classSet.add(Class.forName(className));
+        }
     }
 
     private void praseAutoConfigurationClass() throws Exception {
@@ -53,7 +58,6 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
             }
         }
     }
-
 
     /**
      * pair的left指明是否是配置的bean,right指是否有@Bean注解
@@ -127,14 +131,14 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
             //去掉多余的Component注解
             Annotation[] result = new Annotation[annotations.length - componentIndex.size()];
             for (int i = 0, j = 0, index = 0; i < annotations.length; i++) {
-                if(index<componentIndex.size()){
+                if (index < componentIndex.size()) {
                     if (i == componentIndex.get(index)) {
                         index++;
                     } else {
                         result[j] = annotations[i];
                         j++;
                     }
-                }else{
+                } else {
                     result[j] = annotations[i];
                     j++;
                 }
@@ -163,7 +167,7 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
 
     private BeanDefinition handleTypeAnnot(Class clazz, boolean isBeanAnnotated) throws Exception {
         Annotation[] annotations = clazz.getAnnotations();
-        annotations=deDuplicationAnnotation(annotations);
+        annotations = deDuplicationAnnotation(annotations);
         for (Annotation annotation : annotations) {
             log.debug(annotation + " is component ? " + annotation.annotationType().isAnnotationPresent(Component.class));
             if (annotation.annotationType() == Component.class) {
@@ -192,7 +196,7 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
 
     private void registerBean(BeanDefinition beanDefinition) throws Exception {
         log.debug("bean: {}", beanDefinition);
-        if(getRegisterBeans().putIfAbsent(beanDefinition.getId(), beanDefinition)!=null){
+        if (getRegisterBeans().putIfAbsent(beanDefinition.getId(), beanDefinition) != null) {
             throw new BeanDefinitionException(String.format("bean is duplicate,bean name is '%s'", beanDefinition.getId()));
         }
     }
@@ -242,7 +246,6 @@ public abstract class AnnotationBeanDefinitionReader extends AbstractBeanDefinit
         }
         return methodInfos;
     }
-
 
     public void setScanPackages(List<String> scanPackages) {
         this.scanPackages.addAll(scanPackages);

@@ -1,7 +1,9 @@
 package com.tg.tiny4j.web.reader;
 
-import com.tg.tiny4j.commons.constants.Configuration;
+import com.tg.tiny4j.commons.constants.ConfigurationElement;
 import com.tg.tiny4j.web.exception.ConfigurationException;
+import com.tg.tiny4j.web.jettyembed.Configuration;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,15 +23,16 @@ import java.util.Properties;
 public class ConfigLoader {
     private static final Logger log = LoggerFactory.getLogger(ConfigLoader.class);
 
-    private static Map<String, String> configMap = new HashMap<>();
 
-    private ConfigLoader() {}
-
-    public static void loadConfig() throws Exception{
-        loadConfig(Configuration.DEFAULT_CONFIG_FILE);
+    private ConfigLoader() {
     }
 
-    public static void loadConfig(String name) throws Exception {
+    public static Configuration loadConfig() throws Exception {
+        return loadConfig(ConfigurationElement.DEFAULT_CONFIG_FILE);
+    }
+
+    public static Configuration loadConfig(String name) throws Exception {
+        Configuration configuration = new Configuration();
         InputStream in = ConfigLoader.class.getClassLoader().getResourceAsStream(name);
         if (in == null) {
             throw new ConfigurationException(String.format("'%s' is not exist", name));
@@ -40,15 +43,19 @@ public class ConfigLoader {
             Enumeration en = prop.propertyNames();
             while (en.hasMoreElements()) {
                 String strKey = (String) en.nextElement();
-                configMap.put(strKey, prop.getProperty(strKey));
                 log.debug("get config : {} = {}", strKey, prop.getProperty(strKey));
+                if (ConfigurationElement.COMPONENTSCAN.equals(strKey)) {
+                    configuration.setComponentscan(prop.getProperty(strKey));
+                } else if (ConfigurationElement.SERVER_CONTEXTPATH.equals(strKey)) {
+                    configuration.setContextPath(prop.getProperty(strKey));
+                } else if (ConfigurationElement.SERVER_PORT.equals(strKey)) {
+                    configuration.setPort(Integer.valueOf(prop.getProperty(strKey)));
+                }
             }
         } finally {
-            in.close();
+            IOUtils.closeQuietly(in);
         }
+        return configuration;
     }
 
-    public static Map<String, String> getConfigMap() {
-        return configMap;
-    }
 }

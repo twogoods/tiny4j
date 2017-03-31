@@ -1,4 +1,4 @@
-package com.tg.tomcat;
+package com.tg.embed;
 
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.core.StandardContext;
@@ -9,11 +9,16 @@ import org.apache.catalina.webresources.StandardRoot;
 import java.io.File;
 
 /**
- * Created by twogoods on 16/10/21.
+ * Description:
+ *
+ * @author twogoods
+ * @version 0.1
+ * @since 2017-03-31
  */
-public class TestTomcat {
+public class TomcatTest {
+
     //http://blog.csdn.net/hengyunabc/article/details/50120001
-    public static void main(String[] args) throws Exception {
+    public static void test(String[] args) throws Exception {
         String webappDirLocation = "web-test/src/main/webapp/";
         Tomcat tomcat = new Tomcat();
 
@@ -23,9 +28,7 @@ public class TestTomcat {
         if (webPort == null || webPort.isEmpty()) {
             webPort = "8080";
         }
-
         tomcat.setPort(Integer.valueOf(webPort));
-
         StandardContext ctx = (StandardContext) tomcat.addWebapp("/", new File(webappDirLocation).getAbsolutePath());
         System.out.println("configuring app with basedir: " + new File(webappDirLocation).getAbsolutePath());
 
@@ -40,4 +43,5 @@ public class TestTomcat {
         tomcat.start();
         tomcat.getServer().await();
     }
+
 }
