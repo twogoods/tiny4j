@@ -178,7 +178,6 @@ public class DispatcherServlet extends HttpServlet {
         Object result = null;
         try {
             if (method.getParameterCount() == 0) {
-                System.out.println(apis.get(requestHandleInfo.getBeanName()).getObject());
                 result = method.invoke(apis.get(requestHandleInfo.getBeanName()).getObject());
             } else {
                 result = method.invoke(apis.get(requestHandleInfo.getBeanName()).getObject(), praseParam(method, req, resp));

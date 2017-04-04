@@ -68,6 +68,6 @@ public class BeanAnnotatedAopInterceptor implements AopInterceptor {
     }
 
     private String getFieldNameBySetter(String setterName) {
-        return WordUtils.uncapitalize(setterName.substring(3));
+        return WordUtils.uncapitalize(setterName.substring("set".length()));
     }
 }

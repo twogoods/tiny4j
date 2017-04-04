@@ -13,8 +13,6 @@ import java.util.Arrays;
 public class TestAopInterceptor implements AopInterceptor {
     @Override
     public Object invoke(Methodinvocation invocation) throws Throwable {
-
-
         String methodName=invocation.getMethod().getName();
         if(methodName.startsWith("set")){
             Field f=invocation.getObjClass().getDeclaredField(getFieldNameBySetter(methodName));
@@ -23,8 +21,7 @@ public class TestAopInterceptor implements AopInterceptor {
             System.out.println("do setter....");
             return null;
         }
-
-        //System.out.println(String.format("***--before--method:{%s},args:{%s}",invocation.getMethod().getName(), Arrays.asList(invocation.getArguments())));
+        System.out.println(String.format("***--before--method:{%s},args:{%s}",invocation.getMethod().getName(), Arrays.asList(invocation.getArguments())));
         Object result=invocation.proceed();
         System.out.println(String.format("***--after--result:{%s}",result));
         return result;
